@@ -4,8 +4,8 @@ A .NET Aspire version of Dakota's PWA-API project (https://github.com/thedakotes
 
 Prereqs:
 
-Visual Studio 2022
-Docker (https://www.docker.com)
+- Visual Studio 2022
+- Docker (https://www.docker.com)
 
 This project needs to live (for now) at the same level of the PWA-Web folder, until we figure out if this even works.
 
