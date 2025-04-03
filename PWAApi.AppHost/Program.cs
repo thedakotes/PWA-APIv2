@@ -41,7 +41,7 @@ var apiService = builder.AddProject<Projects.PWAApi_ApiService>("pwaapi")
 builder.AddNpmApp("angular", "../../PWA-Web")
     .WithReference(apiService)
     .WaitFor(apiService)
-    .WithHttpEndpoint(env: "PORT")
+    .WithHttpEndpoint(port: 4200, env: "PORT") //without the port: 4200 it will be a random port every time you restart AppHost
     .WithExternalHttpEndpoints()
     .WithReference(cache)
     .WaitFor(cache)

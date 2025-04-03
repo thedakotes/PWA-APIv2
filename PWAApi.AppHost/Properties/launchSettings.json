@@ -5,7 +5,7 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:17280;http://localhost:15115",
+      "applicationUrl": "https://localhost:17280;http://localhost:15115", //This is the URL for the Aspire Dashboard
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "DOTNET_ENVIRONMENT": "Development",
