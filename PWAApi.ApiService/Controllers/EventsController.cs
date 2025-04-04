@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EventApi.Data;
-using EventApi.Models;
-using EventApi.DataTransferObjects;
+using API.Models;
+using API.DataTransferObjects;
 
 namespace EventApi.Controllers;
 

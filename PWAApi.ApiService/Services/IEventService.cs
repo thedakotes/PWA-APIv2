@@ -1,5 +1,5 @@
-using EventApi.DataTransferObjects;
-using EventApi.Models;
+using API.DataTransferObjects;
+using API.Models;
 
 public interface IEventService
 {
@@ -7,4 +7,5 @@ public interface IEventService
     Task<IEnumerable<EventDTO>> GetAllEventsAsync();
     Task<EventDTO?> GetEventByIdAsync(int id);
     Task DeleteEventAsync(int id);
+    Task UpdateEventAsync(EventDTO updatedEvent);
 }
