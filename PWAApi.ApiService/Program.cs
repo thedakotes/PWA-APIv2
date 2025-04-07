@@ -1,12 +1,17 @@
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
 using EventApi.Data;
-using API.Services;
+using API.Services.PlantID;
+using Microsoft.AspNetCore.Http.Features;
+using AutoMapper;
+using PWAApi.ApiService.Services.PlantID;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
+
+// Configure the HTTP request pipeline.
+builder.Services.AddHttpClient();
 
 //Distributed Cache where we can add/remove items to/from the Redis cache
 builder.AddRedisDistributedCache("cache");
@@ -14,30 +19,45 @@ builder.AddRedisDistributedCache("cache");
 // Add services to the container.
 builder.Services.AddProblemDetails();
 
-// Register AutoMapper (scanning all assemblies for profiles)
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
 // Register your database context (change connection string as needed)
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Register AutoMapper (scanning all assemblies for profiles)
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 // Register repository and service for dependency injection
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IPlantInfoService, PerenualPlantInfoService>();
 
+// Set API providers from configuration
 var plantIDAPIProvider = builder.Configuration["PlantIDProvider"];
-
 if (plantIDAPIProvider == "PlantNet")
 {
     builder.Services.AddScoped<IPlantIDService, PlantNetService>();
 }
 else if (plantIDAPIProvider == "PlantID")
 {
-    builder.Services.AddHttpClient<IPlantIDService, PlantIDService>();
+    builder.Services.AddScoped<IPlantIDService, PlantIDService>();
 }
 else
 {
     throw new Exception("Invalid PlantIDProvider configuration. Must be 'PlantNet' or 'PlantID'.");
+}
+
+var plantInfoAPIProvider = builder.Configuration["PlantInfoProvider"];
+if (plantInfoAPIProvider == "Perenual")
+{
+    builder.Services.AddScoped<IPlantInfoService, PerenualPlantInfoService>();
+}
+else if (plantInfoAPIProvider == "PermaPeople")
+{
+    builder.Services.AddScoped<IPlantInfoService, PermaPeoplePlantInfoService>();
+}
+else
+{
+    throw new Exception("Invalid PlantInfoProvider configuration. Must be 'Perenual' or 'PermaPeople'");
 }
 
 // Load user secrets
@@ -57,7 +77,6 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
@@ -69,17 +88,32 @@ builder.Services.AddCors(options =>
         });
 });
 
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 50_000_000; // 50 MB
+});
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseExceptionHandler();
 
-// Enable Swagger (only for development or debugging)
 if (app.Environment.IsDevelopment())
 {
+    // Enable Swagger (only for development or debugging)
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    // Check AutoMapper configuration
+    try
+    {
+        var mapper = app.Services.GetRequiredService<IMapper>();
+        mapper.ConfigurationProvider.AssertConfigurationIsValid();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"AutoMapper configuration error: {ex.Message}");
+    }
 }
 
 // Configure the HTTP request pipeline for production

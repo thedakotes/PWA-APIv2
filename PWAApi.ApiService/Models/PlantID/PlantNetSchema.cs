@@ -1,23 +1,21 @@
-﻿using Microsoft.AspNetCore.Routing.Constraints;
-
-namespace API.DataTransferObjects
+﻿namespace PWAApi.ApiService.Models.PlantID
 {
-    public class PlantIDDTO
+    public class PlantNetSchema
     {
-        public PlantIDQuery? Query { get; set; }
+        public PlantNetQuery? Query { get; set; }
         public string? Language { get; set; }
         public string? PreferredReferential { get; set; }
         public string? SwitchToProject { get; set; }
         public string? BestMatch { get; set; }
         public string? Version { get; set; }
-        public PlantIDResult[]? Results { get; set; }
+        public PlantNetResult[]? Results { get; set; }
         public int RemainingIdentificationRequests { get; set; }
         public Model5[]? PredictedOrgans { get; set; }
 
-        public PlantIDDTO() { }
+        public PlantNetSchema() { }
     }
 
-    public class PlantIDQuery
+    public class PlantNetQuery
     {
         public string? Project { get; set; }
         public string[]? Images { get; set; }
@@ -27,11 +25,11 @@ namespace API.DataTransferObjects
         public string? Type { get; set; }
     }
 
-    public class PlantIDResult
+    public class PlantNetResult
     {
         public float Score { get; set; }
         public Model4? Species { get; set; }
-        public PlantIDImage[]? Images { get; set; }
+        public PlantNetImage[]? Images { get; set; }
         public GBIF? GBIF { get; set; }
         public POWO? POWO { get; set; }
         public IUCN? IUCN { get; set; }
@@ -61,25 +59,25 @@ namespace API.DataTransferObjects
         public string? ScientificName { get; set; }
     }
 
-    public class PlantIDImage
+    public class PlantNetImage
     {
         public string? Organ { get; set; }
         public string? Author { get; set; }
         public string? License { get; set; }
-        public PlantIDImage? Date { get; set; }
+        public PlantNetImageDate? Date { get; set; }
         public string? Citation { get; set; }
-        public PlantIDUrl? Url { get; set; }
+        public PlantNetUrl? Url { get; set; }
     }
 
-    public class PlantIDImageDate
+    public class PlantNetImageDate
     {
-        public int Timestamp { get; set; }
+        public long? Timestamp { get; set; }
         public string? String { get; set; }
     }
 
-    public class PlantIDUrl
+    public class PlantNetUrl
     {
-        public string? O { get; set; }
+        public string? O {  get; set; }
         public string? M { get; set; }
         public string? S { get; set; }
     }

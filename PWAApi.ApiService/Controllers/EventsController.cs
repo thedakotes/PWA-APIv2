@@ -1,8 +1,5 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using EventApi.Data;
-using API.Models;
 using API.DataTransferObjects;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EventApi.Controllers;
 
@@ -39,8 +36,8 @@ public class EventsController : ControllerBase
         try
         {
             // Retrieve all events from the service
-            var events = await _eventsService.GetEventByIdAsync(id);
-            return Ok(events); // Return a 200 OK response with the list of events
+            var eventModel = await _eventsService.GetEventByIdAsync(id);
+            return Ok(eventModel); // Return a 200 OK response with the event
         }
         catch (Exception ex)
         {

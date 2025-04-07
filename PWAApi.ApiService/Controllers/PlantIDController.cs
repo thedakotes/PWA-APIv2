@@ -1,6 +1,6 @@
-﻿using API.DataTransferObjects;
-using API.Services;
+﻿using API.Services.PlantID;
 using Microsoft.AspNetCore.Mvc;
+using PWAApi.ApiService.DataTransferObjects.PlantID;
 
 namespace API.Controllers
 {
@@ -9,22 +9,44 @@ namespace API.Controllers
     public class PlantIDController : ControllerBase
     {
         IPlantIDService _plantIDService;
-        public PlantIDController(IPlantIDService plantIDService)
+        IPlantInfoService _plantInfoService;
+
+        public PlantIDController(IPlantIDService plantIDService, IPlantInfoService plantInfoService)
         {
             _plantIDService = plantIDService;
+            _plantInfoService = plantInfoService;
         }
 
-        [HttpPost("Search")]
-        public async Task<IActionResult> Search([FromForm] PlantIDRequestDTO plantID)
+        [HttpGet("{name}")]
+        public async Task<IActionResult> Get(string name)
         {
-            if (plantID.File == null || plantID.File.Length == 0)
+            if (String.IsNullOrEmpty(name))
+            {
+                return BadRequest("No saerch term provided");
+            }
+
+            try
+            {
+                var result = await _plantInfoService.GetPlantSpeciesAsync(name);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpPost("Identify")]
+        public async Task<IActionResult> Identify([FromForm] PlantIDRequestDTO plantID)
+        {
+            if (plantID.Files == null || !plantID.Files.Any())
             {
                 return BadRequest("No file uploaded");
             }
 
             try
             {
-                var result = await _plantIDService.IdentifyPlantAsync(plantID.File);
+                var result = await _plantIDService.IdentifyPlantAsync(plantID.Files);
                 return Ok(result);
             }
             catch (Exception ex)

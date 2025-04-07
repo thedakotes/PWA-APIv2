@@ -1,5 +1,4 @@
 using API.DataTransferObjects;
-using API.Models;
 
 public interface IEventService
 {
