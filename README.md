@@ -6,8 +6,9 @@ Prereqs:
 
 - Visual Studio 2022
 - Docker (https://www.docker.com)
+- Web project from Dakota's repo (https://github.com/thedakotes/PWA-Web)
 
-This project needs to live (for now) at the same level of the PWA-Web folder, until we figure out if this even works.
+This project needs to live (for now) at the same level of the PWA-Web folder (https://github.com/thedakotes/PWA-Web)
 
 Docker needs to be running on your desktop prior to running the project.
 Set the startup project to be PWAApi.AppHost and click the 'https' button. 
