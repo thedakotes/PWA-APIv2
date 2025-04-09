@@ -38,7 +38,7 @@ var apiService = builder.AddProject<Projects.PWAApi_ApiService>("pwaapi")
 //This needs to point to the folder where the Web project is located. I contemplated putting the 
 //Web project in the same folder as this solution, but we can talk about that later. Just make sure that your PWA-Web
 //project sits at the same level as the PWA-APIv2 folder
-builder.AddNpmApp("angular", "E://Business/Progressive Web App/PWA-Web")
+builder.AddNpmApp("angular", "../../PWA-Web")
     .WithReference(apiService)
     .WaitFor(apiService)
     .WithHttpEndpoint(port: 4200, env: "PORT") //without the port: 4200 it will be a random port every time you restart AppHost

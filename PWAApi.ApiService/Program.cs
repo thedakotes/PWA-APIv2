@@ -4,6 +4,7 @@ using API.Services.PlantID;
 using Microsoft.AspNetCore.Http.Features;
 using AutoMapper;
 using PWAApi.ApiService.Services.PlantID;
+using PWAApi.ApiService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IPlantInfoService, PerenualPlantInfoService>();
+builder.Services.AddScoped<OpenAIService>();
 
 // Set API providers from configuration
 var plantIDAPIProvider = builder.Configuration["PlantIDProvider"];
@@ -123,6 +125,8 @@ app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthorization();
 
 // Map controllers (API endpoints)
+// In previous version of ASP.NET Core (3-5), you would need to call UseRouting and UseEndpoints explicitly
+// But in ASP.NET Core 6+, the MapControllers method is sufficient to set up routing for attribute-routed controllers
 app.MapControllers();
 
 app.Run();

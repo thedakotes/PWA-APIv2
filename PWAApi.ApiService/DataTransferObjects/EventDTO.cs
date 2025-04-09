@@ -7,4 +7,5 @@ public class EventDTO
     public DateTime Date { get; set; } // Date of the event, using DateTime to represent date and time information
     public DateTime CreatedAt { get; set; } // Timestamps for when the event was created
     public DateTime UpdatedAt { get; set; } // Timestamps for when the event was last updated
+    public string Color { get; set; } = string.Empty; //hex string of the color of the event
 }
