@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Collections;
+using System.Text.Json;
 using AutoMapper;
 using PWAApi.ApiService.Models.PlantID;
 
@@ -22,6 +23,9 @@ namespace PWAApi.ApiService.Services.PlantID
         protected async Task<T> FetchPlantSpeciesAsync<T>(string requestUrl, HttpMethod httpMethod, params (string key, string value)[] headers)
         {
             var request = new HttpRequestMessage(httpMethod, requestUrl);
+            ArrayList results = new ArrayList();
+            results.Add(_apiKey);
+            results.Add(_httpClient);
 
             foreach (var header in headers)
             {

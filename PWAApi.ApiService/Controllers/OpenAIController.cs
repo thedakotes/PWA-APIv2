@@ -8,11 +8,11 @@ namespace PWAApi.ApiService.Controllers
     public class OpenAIController : ControllerBase
     {
 
-        private readonly OpenAIService _openAIService;
+        private readonly IAIService _aiService;
 
-        public OpenAIController(OpenAIService openAIService)
+        public OpenAIController(IAIService aiService)
         {
-            _openAIService = openAIService ?? throw new ArgumentNullException(nameof(openAIService));
+            _aiService = aiService ?? throw new ArgumentNullException(nameof(aiService));
         }
 
         [HttpGet("AskAI")]
@@ -20,7 +20,7 @@ namespace PWAApi.ApiService.Controllers
         {
             try
             {
-                var result = await _openAIService.AskAI(question);
+                var result = await _aiService.AskAI(question);
                 return Ok(result);
             }
             catch (Exception ex)

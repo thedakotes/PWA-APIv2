@@ -22,7 +22,7 @@ namespace API.Controllers
         {
             if (String.IsNullOrEmpty(name))
             {
-                return BadRequest("No saerch term provided");
+                return BadRequest("No search term provided");
             }
 
             try

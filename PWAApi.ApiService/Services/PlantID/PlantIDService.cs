@@ -5,7 +5,7 @@ namespace API.Services.PlantID
 {
     public class PlantIDService : IPlantIDService
     {
-        public Task<List<PlantIDDTO>> IdentifyPlantAsync(List<IFormFile> file)
+        public Task<IEnumerable<PlantIDDTO>> IdentifyPlantAsync(List<IFormFile> file)
         {
             throw new NotImplementedException();
         }

@@ -5,6 +5,6 @@ namespace API.Services.PlantID
 {
     public interface IPlantIDService
     {
-        Task<List<PlantIDDTO>> IdentifyPlantAsync(List<IFormFile> files);
+        Task<IEnumerable<PlantIDDTO>> IdentifyPlantAsync(List<IFormFile> files);
     }
 }

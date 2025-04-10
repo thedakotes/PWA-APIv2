@@ -20,43 +20,53 @@ namespace API.Services.PlantID
             _mapper = mapper;
         }
 
-        public async Task<List<PlantIDDTO>> IdentifyPlantAsync(List<IFormFile> files)
+        public async Task<IEnumerable<PlantIDDTO>> IdentifyPlantAsync(List<IFormFile> files)
         {
             var content = new MultipartFormDataContent();
             foreach (var file in files)
             {
                 if (file.Length > 0)
                 {
-                    var streamContent = new StreamContent(file.OpenReadStream());
-                    streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
-
-                    content.Add(streamContent, "images", file.FileName);
-                    content.Add(new StringContent("flower"), "organs");
+                    SetContent(file, content);
                 }
             }
 
-            string queryParams = $"include-related-images=true&no-reject=false&nb-results=10&lang=en&api-key={_apiKey}";
             try
             {
-                var response = await _httpClient.PostAsync($"{url}?{queryParams}", content);
-                var responseBody = await response.Content.ReadAsStringAsync();
-
-                var result = JsonSerializer.Deserialize<PlantNetSchema>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true});
-                if (result?.Results != null)
-                {
-                    Console.WriteLine(result.Results.FirstOrDefault()?.GetType().Name);
-                    var mappedResults = result.Results.Select(x => _mapper.Map<PlantIDDTO>(x)).ToList();
-                    return mappedResults;
-                }
-                else
-                {
-                    throw new Exception("Failed to parse PlantNet response");
-                }
+                var result = await Post(content);
+                return result;
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        private async Task<IEnumerable<PlantIDDTO>> Post(MultipartFormDataContent content)
+        {
+            string queryParams = $"include-related-images=true&no-reject=false&lang=en&api-key={_apiKey}";
+            var response = await _httpClient.PostAsync($"{url}?{queryParams}", content);
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            var result = JsonSerializer.Deserialize<PlantNetSchema>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            if (result?.Results != null)
+            {
+                var mappedResults = result.Results.Select(x => _mapper.Map<PlantIDDTO>(x)).ToList();
+                return mappedResults;
+            }
+            else
+            {
+                throw new Exception("Failed to parse PlantNet response");
+            }
+        }
+
+        private void SetContent(IFormFile file, MultipartFormDataContent content)
+        {
+            var streamContent = new StreamContent(file.OpenReadStream());
+            streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+
+            content.Add(streamContent, "images", file.FileName);
+            content.Add(new StringContent("flower"), "organs");
         }
     }
 }

@@ -31,7 +31,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IPlantInfoService, PerenualPlantInfoService>();
-builder.Services.AddScoped<OpenAIService>();
+builder.Services.AddScoped<IAIService, OpenAIService>();
 
 // Set API providers from configuration
 var plantIDAPIProvider = builder.Configuration["PlantIDProvider"];

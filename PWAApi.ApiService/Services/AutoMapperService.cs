@@ -27,7 +27,8 @@ public class MappingProfile: Profile
         //#endregion
 
         //#region Plant Info
-        CreateMap<PWAApi.ApiService.Models.PlantID.Perenual.Plant, PlantDTO>();
+        CreateMap<PWAApi.ApiService.Models.PlantID.Perenual.Plant, PlantDTO>()
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.CommonName));
         CreateMap<Plant, PlantDTO>()
             .ForMember(dest => dest.Edibility, opt => opt.MapFrom(src => MapEdibilityDTO(src)))
             .ForMember(dest => dest.Growth, opt => opt.MapFrom(src => MapPlantDataItem(src.Data, "Growth")))

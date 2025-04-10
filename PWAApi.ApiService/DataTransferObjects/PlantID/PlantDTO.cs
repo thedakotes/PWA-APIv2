@@ -11,8 +11,8 @@
         public string Link { get; set; } = string.Empty;
         public int? ParentId { get; set; }
         public string Slug { get; set; } = string.Empty;
-        public DateTime UpdatedAt { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
         public EdibilityDTO Edibility { get; set; } = new EdibilityDTO(false, []);
         public string Growth { get; set; } = string.Empty;
         public string WaterRequirement { get; set; } = string.Empty;
