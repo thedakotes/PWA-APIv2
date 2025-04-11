@@ -4,6 +4,8 @@ namespace API.Services.PlantID
 {
     public interface IPlantInfoService
     {
-        Task<IEnumerable<PlantDTO>> GetPlantSpeciesAsync(string name);
+        Task<IEnumerable<PlantDTO?>> GetPlantSpeciesAsync(string species);
+
+        Task<PlantDTO?> GetPlantAsync(string species);
     }
 }

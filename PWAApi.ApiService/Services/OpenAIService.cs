@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using OpenAI.Chat;
+using PWAApi.ApiService.DataTransferObjects.PlantID;
 
 namespace PWAApi.ApiService.Services
 {
@@ -15,11 +16,7 @@ namespace PWAApi.ApiService.Services
 
         public async Task<string> AskAI(string question)
         {
-            ChatCompletionOptions options = new()
-            {
-                ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
-                    jsonSchemaFormatName: "suggest_flowers",
-                    jsonSchema: BinaryData.FromBytes("""
+            var schema = """
                         {
                             "type": "object",
                             "properties": {
@@ -39,7 +36,12 @@ namespace PWAApi.ApiService.Services
                             "required": ["flowers"],
                             "additionalProperties": false
                         }
-                        """u8.ToArray()),
+                        """;
+            ChatCompletionOptions options = new()
+            {
+                ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
+                    jsonSchemaFormatName: "suggest_flowers",
+                    jsonSchema: BinaryData.FromBytes((System.Text.Encoding.UTF8.GetBytes(schema)).ToArray()),
                     jsonSchemaIsStrict: true)
             };
             var chat = new ChatClient(model: "gpt-4o-mini", apiKey: apiKey);
@@ -49,8 +51,26 @@ namespace PWAApi.ApiService.Services
                 new UserChatMessage(question)
             }, options)).Value;
             using JsonDocument structuredJson = JsonDocument.Parse(completion.Content[0].Text);
-            Console.WriteLine(structuredJson.RootElement.GetProperty("interval"));
             return completion.Content[0].Text;
+        }
+
+        public async Task<T?> Ask<T>(ChatCompletionOptions options, UserChatMessage[] userChatMessages)
+        {
+            var chat = new ChatClient(model: "gpt-4o-mini", apiKey: apiKey);
+            var completion = (await chat.CompleteChatAsync(userChatMessages, options)).Value;
+            using (JsonDocument structuredJson = JsonDocument.Parse(completion.Content[0].Text))
+            {
+                string jsonString = structuredJson.RootElement.GetRawText();
+                try
+                {
+                    var deserializedObject = JsonSerializer.Deserialize<T>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    return deserializedObject;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
+            }
         }
     }
 }

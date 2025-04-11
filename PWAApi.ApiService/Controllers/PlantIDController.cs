@@ -27,7 +27,7 @@ namespace API.Controllers
 
             try
             {
-                var result = await _plantInfoService.GetPlantSpeciesAsync(name);
+                var result = await _plantInfoService.GetPlantAsync(name);
                 return Ok(result);
             }
             catch (Exception ex)

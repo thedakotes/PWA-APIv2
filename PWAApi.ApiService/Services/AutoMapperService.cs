@@ -25,30 +25,5 @@ public class MappingProfile: Profile
         CreateMap<TaxonomicRank, TaxonomicRankDTO>();
         CreateMap<IUCN, IUCNDTO>();
         //#endregion
-
-        //#region Plant Info
-        CreateMap<PWAApi.ApiService.Models.PlantID.Perenual.Plant, PlantDTO>()
-            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.CommonName));
-        CreateMap<Plant, PlantDTO>()
-            .ForMember(dest => dest.Edibility, opt => opt.MapFrom(src => MapEdibilityDTO(src)))
-            .ForMember(dest => dest.Growth, opt => opt.MapFrom(src => MapPlantDataItem(src.Data, "Growth")))
-            .ForMember(dest => dest.WaterRequirement, opt => opt.MapFrom(src => MapPlantDataItem(src.Data, "Water requirement")))
-            .ForMember(dest => dest.LightRequirement, opt => opt.MapFrom(src => MapPlantDataItem(src.Data, "Light requirement")))
-            .ForMember(dest => dest.USDAHardinessZone, opt => opt.MapFrom(src => MapPlantDataItem(src.Data, "USDA Hardiness zone")))
-            .ForMember(dest => dest.Layer, opt => opt.MapFrom(src => MapPlantDataItem(src.Data, "Layer")))
-            .ForMember(dest => dest.SoilType, opt => opt.MapFrom(src => MapPlantDataItem(src.Data, "Soil type")));
-        //#endregion
-    }
-
-    private static EdibilityDTO MapEdibilityDTO(Plant src)
-    {
-        var isEdible = src.Data.FirstOrDefault(x => x.Key == "Edible")?.Value == "true";
-        var parts = src.Data.Where(x => x.Key == "Edible parts").SelectMany(x => x.Value.Split(","));
-        return new EdibilityDTO(isEdible, parts);
-    }
-
-    private static string MapPlantDataItem(IEnumerable<PlantDataItem> src, string key)
-    {
-        return src.FirstOrDefault(x => x.Key == key)?.Value ?? string.Empty;
     }
 }

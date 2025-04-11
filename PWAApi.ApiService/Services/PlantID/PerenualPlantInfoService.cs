@@ -10,6 +10,11 @@ namespace API.Services.PlantID
         public PerenualPlantInfoService(IHttpClientFactory httpClientFactory, IConfiguration config, IMapper mapper) : base(httpClientFactory, config, mapper, "Perenual:ApiKey", "https://perenual.com/api/v2/")
         { }
 
+        public Task<PlantDTO?> GetPlantAsync(string species)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<IEnumerable<PlantDTO>> GetPlantSpeciesAsync(string species)
         {
             string queryParams = $"key={_apiKey}&q={species}";
