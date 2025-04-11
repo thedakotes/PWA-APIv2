@@ -1,6 +1,10 @@
+using System.Text.Json.Serialization;
+using PWAApi.ApiService.Attributes;
+
 namespace API.DataTransferObjects; // This namespace is used to organize the EventDTO class, indicating that it belongs to the Data Transfer Objects layer of the application
 public class EventDTO
 {
+    [SkipAISchema]
     public int Id {get;set;}    
     public string Title { get; set; } = string.Empty; // Title of the event, initialized to an empty string to avoid null reference issues
     public string Description { get; set; } = string.Empty; // Description of the event, also initialized to an empty string

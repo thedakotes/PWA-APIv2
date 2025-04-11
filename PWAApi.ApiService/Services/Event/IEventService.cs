@@ -7,4 +7,6 @@ public interface IEventService
     Task<EventDTO?> GetEventByIdAsync(int id);
     Task DeleteEventAsync(int id);
     Task UpdateEventAsync(EventDTO updatedEvent);
+
+    Task<List<EventDTO>> AICreateEvents(string eventDetails);
 }

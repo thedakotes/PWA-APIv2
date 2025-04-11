@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PWAApi.ApiService.Services;
+using PWAApi.ApiService.Services.AI;
 
 namespace PWAApi.ApiService.Controllers
 {

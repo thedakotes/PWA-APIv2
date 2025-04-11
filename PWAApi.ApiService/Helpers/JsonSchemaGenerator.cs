@@ -1,5 +1,7 @@
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using PWAApi.ApiService.Attributes;
 
 public static class JsonSchemaGenerator
 {
@@ -22,6 +24,9 @@ public static class JsonSchemaGenerator
         // Iterate through the properties of the class
         foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
+            if(property.GetCustomAttribute<SkipAISchemaAttribute>() != null)
+                continue; // Skip properties marked with SkipAISchemaAttribute. For example, the Id property. We don't want AI setting that.
+
             // Handle nested objects and collections recursively
             var propertyType = property.PropertyType;
 

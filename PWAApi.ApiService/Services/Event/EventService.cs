@@ -1,16 +1,22 @@
 using AutoMapper;
 using API.DataTransferObjects;
 using API.Models;
+using OpenAI.Chat;
+using PWAApi.ApiService.Services.AI;
 
 public class EventService : IEventService
 {
     private readonly IEventRepository _eventRepository;
     private readonly IMapper _mapper;
+    private readonly IAIService _aiService;
 
-    public EventService(IEventRepository eventRepository, IMapper mapper)
+    public EventService(IEventRepository eventRepository, 
+        IMapper mapper,
+        IAIService aiService)
     {
         _eventRepository = eventRepository;
         _mapper = mapper;
+        _aiService = aiService;
     }
     
     // Retrieve all events from the repository
@@ -62,5 +68,26 @@ public class EventService : IEventService
             _mapper.Map(updatedEvent, existingEvent);
             await _eventRepository.UpdateAsync(existingEvent);
         }
+    }
+
+
+    public async Task<List<EventDTO>> AICreateEvents(string eventDetails)
+    {
+        var schema = JsonSchemaGenerator.GenerateJsonSchema<EventDTO>();
+        ChatCompletionOptions options = new()
+        {
+            ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
+                jsonSchemaFormatName: "event_parsing",
+                jsonSchema: BinaryData.FromBytes(System.Text.Encoding.UTF8.GetBytes(schema)),
+                jsonSchemaIsStrict: true)
+        };
+        var userMessages = new[]
+        {
+                new UserChatMessage($"Create an event for: '{eventDetails}'.")
+        };
+        var result = await _aiService.Ask<EventDTO>(options, userMessages);
+
+        return [result];
+
     }
 }

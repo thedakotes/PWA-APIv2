@@ -4,6 +4,7 @@ using AutoMapper;
 using OpenAI.Chat;
 using PWAApi.ApiService.DataTransferObjects.PlantID;
 using PWAApi.ApiService.Models.PlantID.PermaPeople;
+using PWAApi.ApiService.Services.AI;
 
 namespace PWAApi.ApiService.Services.PlantID
 {

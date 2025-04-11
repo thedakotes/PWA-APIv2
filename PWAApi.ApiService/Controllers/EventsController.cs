@@ -66,6 +66,22 @@ public class EventsController : ControllerBase
         }
     }
 
+    [HttpPost("AICreateEvents")]
+    public async Task<IActionResult> AICreateEvents(string message)
+    {
+       
+        try
+        {
+            //This could potentially be a number of different events that get sent in? I haven't tried this yet tho.
+            List<EventDTO> events = await _eventsService.AICreateEvents(message);
+            return Ok(events); // Return a 200
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}"); // Handle exceptions
+        }
+    }
+
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteEvent(int id)
     {

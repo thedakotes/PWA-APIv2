@@ -1,8 +1,11 @@
 ﻿using System.Text.Json;
 using OpenAI.Chat;
+using System.Text;
+using API.DataTransferObjects;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using PWAApi.ApiService.DataTransferObjects.PlantID;
 
-namespace PWAApi.ApiService.Services
+namespace PWAApi.ApiService.Services.AI
 {
     public class OpenAIService : IAIService
     {
@@ -41,7 +44,7 @@ namespace PWAApi.ApiService.Services
             {
                 ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
                     jsonSchemaFormatName: "suggest_flowers",
-                    jsonSchema: BinaryData.FromBytes((System.Text.Encoding.UTF8.GetBytes(schema)).ToArray()),
+                    jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(schema).ToArray()),
                     jsonSchemaIsStrict: true)
             };
             var chat = new ChatClient(model: "gpt-4o-mini", apiKey: apiKey);

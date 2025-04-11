@@ -4,7 +4,7 @@ using API.Services.PlantID;
 using Microsoft.AspNetCore.Http.Features;
 using AutoMapper;
 using PWAApi.ApiService.Services.PlantID;
-using PWAApi.ApiService.Services;
+using PWAApi.ApiService.Services.AI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +31,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IPlantInfoService, PerenualPlantInfoService>();
-builder.Services.AddScoped<IAIService, OpenAIService>();
+builder.Services.AddScoped<OpenAIService>();
 
 // Set API providers from configuration
 var plantIDAPIProvider = builder.Configuration["PlantIDProvider"];
