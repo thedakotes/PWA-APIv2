@@ -13,50 +13,57 @@ public static class JsonSchemaGenerator
     public static object GenerateJsonSchema(Type type)
     {
         // Start building the JSON schema
-        var schema = new
+        if (!IsCollection(type) && !IsComplexType(type))
         {
-            type = "object",
-            properties = new Dictionary<string, object>(),
-            required = new List<string>(),
-            additionalProperties = false
-        };
-
-        // Iterate through the properties of the class
-        foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
-        {
-            if(property.GetCustomAttribute<SkipAISchemaAttribute>() != null)
-                continue; // Skip properties marked with SkipAISchemaAttribute. For example, the Id property. We don't want AI setting that.
-
-            // Handle nested objects and collections recursively
-            var propertyType = property.PropertyType;
-
-            if (IsCollection(propertyType))
-            {
-                // Handle collections (e.g., arrays, lists)
-                schema.properties[property.Name] = new
-                {
-                    type = "array",
-                    items = GenerateJsonSchema(GetCollectionElementType(propertyType))
-                };
-            }
-            else if (IsComplexType(propertyType))
-            {
-                // Handle nested objects
-                schema.properties[property.Name] = GenerateJsonSchema(propertyType);
-            }
-            else
-            {
-                // Handle primitive types
-                schema.properties[property.Name] = new
-                {
-                    type = GetJsonType(propertyType)
-                };
-            }
-
-            schema.required.Add(property.Name);
+            return new { type = GetJsonType(type) };
         }
+        else
+        {
+            var schema = new
+            {
+                type = GetJsonType(type),
+                properties = new Dictionary<string, object>(),
+                required = new List<string>(),
+                additionalProperties = false
+            };
 
-        return schema;
+            // Iterate through the properties of the class
+            foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (property.GetCustomAttribute<SkipAISchemaAttribute>() != null)
+                    continue; // Skip properties marked with SkipAISchemaAttribute. For example, the Id property. We don't want AI setting that.
+
+                // Handle nested objects and collections recursively
+                var propertyType = property.PropertyType;
+
+                if (IsCollection(propertyType))
+                {
+                    // Handle collections (e.g., arrays, lists)
+                    schema.properties[property.Name] = new
+                    {
+                        type = "array",
+                        items = GenerateJsonSchema(GetCollectionElementType(propertyType))
+                    };
+                }
+                else if (IsComplexType(propertyType))
+                {
+                    // Handle nested objects
+                    schema.properties[property.Name] = GenerateJsonSchema(propertyType);
+                }
+                else
+                {
+                    // Handle primitive types
+                    schema.properties[property.Name] = new
+                    {
+                        type = GetJsonType(propertyType)
+                    };
+                }
+
+                schema.required.Add(property.Name);
+            }
+
+            return schema;
+        }
     }
 
     private static string GetJsonType(Type type)

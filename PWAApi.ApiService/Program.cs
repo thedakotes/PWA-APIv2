@@ -3,8 +3,8 @@ using EventApi.Data;
 using API.Services.PlantID;
 using Microsoft.AspNetCore.Http.Features;
 using AutoMapper;
-using PWAApi.ApiService.Services.PlantID;
 using PWAApi.ApiService.Services.AI;
+using PWAApi.ApiService.Services.PlantInfo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,36 +30,35 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 // Register repository and service for dependency injection
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IEventService, EventService>();
-builder.Services.AddScoped<IPlantInfoService, PerenualPlantInfoService>();
-builder.Services.AddScoped<OpenAIService>();
+builder.Services.AddScoped<IAIService, OpenAIService>();
 
 // Set API providers from configuration
 var plantIDAPIProvider = builder.Configuration["PlantIDProvider"];
-if (plantIDAPIProvider == "PlantNet")
+switch (plantIDAPIProvider)
 {
-    builder.Services.AddScoped<IPlantIDService, PlantNetService>();
-}
-else if (plantIDAPIProvider == "PlantID")
-{
-    builder.Services.AddScoped<IPlantIDService, PlantIDService>();
-}
-else
-{
-    throw new Exception("Invalid PlantIDProvider configuration. Must be 'PlantNet' or 'PlantID'.");
+    case "PlantNet":
+        builder.Services.AddScoped<IPlantIDService, PlantNetService>();
+        break;
+    case "PlantID":
+        builder.Services.AddScoped<IPlantIDService, PlantIDService>();
+        break;
+    default:
+        throw new Exception("Invalid PlantInfoProvider configuration. Must be 'Perenual' or 'PermaPeople'");
 }
 
 var plantInfoAPIProvider = builder.Configuration["PlantInfoProvider"];
-if (plantInfoAPIProvider == "Perenual")
+switch (plantInfoAPIProvider)
 {
-    builder.Services.AddScoped<IPlantInfoService, PerenualPlantInfoService>();
-}
-else if (plantInfoAPIProvider == "PermaPeople")
-{
-    builder.Services.AddScoped<IPlantInfoService, PermaPeoplePlantInfoService>();
-}
-else
-{
-    throw new Exception("Invalid PlantInfoProvider configuration. Must be 'Perenual' or 'PermaPeople'");
+    case "Perenual":
+        builder.Services.AddScoped<IPlantInfoService, PerenualPlantInfoService>();
+        break;
+    case "PermaPeople":
+        builder.Services.AddScoped<IPlantInfoService, PermaPeoplePlantInfoService>();
+        break;
+    case "AI":
+    default:
+        builder.Services.AddScoped<IPlantInfoService, AIPlantInfoService>();
+        break;
 }
 
 // Load user secrets

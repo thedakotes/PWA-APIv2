@@ -1,11 +1,9 @@
 ﻿using PWAApi.ApiService.DataTransferObjects.PlantID;
 
-namespace API.Services.PlantID
+namespace PWAApi.ApiService.Services.PlantInfo
 {
     public interface IPlantInfoService
     {
-        Task<IEnumerable<PlantDTO?>> GetPlantSpeciesAsync(string species);
-
         Task<PlantDTO?> GetPlantAsync(string species);
     }
 }

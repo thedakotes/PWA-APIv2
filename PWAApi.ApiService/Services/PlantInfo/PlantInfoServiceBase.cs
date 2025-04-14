@@ -1,9 +1,8 @@
 ﻿using System.Collections;
 using System.Text.Json;
 using AutoMapper;
-using PWAApi.ApiService.Models.PlantID;
 
-namespace PWAApi.ApiService.Services.PlantID
+namespace PWAApi.ApiService.Services.PlantInfo
 {
     public class PlantInfoServiceBase
     {

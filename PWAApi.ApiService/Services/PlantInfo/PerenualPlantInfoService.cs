@@ -1,9 +1,8 @@
-﻿ using AutoMapper;
+﻿using AutoMapper;
 using PWAApi.ApiService.DataTransferObjects.PlantID;
 using PWAApi.ApiService.Models.PlantID.Perenual;
-using PWAApi.ApiService.Services.PlantID;
 
-namespace API.Services.PlantID
+namespace PWAApi.ApiService.Services.PlantInfo
 {
     public class PerenualPlantInfoService : PlantInfoServiceBase, IPlantInfoService
     {
