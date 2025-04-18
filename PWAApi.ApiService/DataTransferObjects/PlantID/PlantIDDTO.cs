@@ -1,4 +1,7 @@
-﻿namespace PWAApi.ApiService.DataTransferObjects.PlantID
+﻿using System.Text.Json.Serialization;
+using PWAApi.ApiService.Attributes;
+
+namespace PWAApi.ApiService.DataTransferObjects.PlantID
 {
     public class PlantIDDTO
     {

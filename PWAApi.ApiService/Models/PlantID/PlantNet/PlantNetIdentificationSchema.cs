@@ -1,6 +1,6 @@
-﻿namespace PWAApi.ApiService.Models.PlantID
+﻿namespace PWAApi.ApiService.Models.PlantID.PlantNet
 {
-    public class PlantNetSchema
+    public class PlantNetIdentificationSchema
     {
         public PlantNetQuery? Query { get; set; }
         public string? Language { get; set; }
@@ -12,7 +12,7 @@
         public int RemainingIdentificationRequests { get; set; }
         public Model5[]? PredictedOrgans { get; set; }
 
-        public PlantNetSchema() { }
+        public PlantNetIdentificationSchema() { }
     }
 
     public class PlantNetQuery

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http.Features;
 using AutoMapper;
 using PWAApi.ApiService.Services.AI;
 using PWAApi.ApiService.Services.PlantInfo;
+using PWAApi.ApiService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,30 +32,22 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IAIService, OpenAIService>();
+builder.Services.AddScoped<WateringScheduleService>();
+builder.Services.AddScoped<WikimediaService>();
 
 // Set API providers from configuration
 var plantIDAPIProvider = builder.Configuration["PlantIDProvider"];
 switch (plantIDAPIProvider)
 {
     case "PlantNet":
+    default:
         builder.Services.AddScoped<IPlantIDService, PlantNetService>();
         break;
-    case "PlantID":
-        builder.Services.AddScoped<IPlantIDService, PlantIDService>();
-        break;
-    default:
-        throw new Exception("Invalid PlantInfoProvider configuration. Must be 'Perenual' or 'PermaPeople'");
 }
 
 var plantInfoAPIProvider = builder.Configuration["PlantInfoProvider"];
 switch (plantInfoAPIProvider)
 {
-    case "Perenual":
-        builder.Services.AddScoped<IPlantInfoService, PerenualPlantInfoService>();
-        break;
-    case "PermaPeople":
-        builder.Services.AddScoped<IPlantInfoService, PermaPeoplePlantInfoService>();
-        break;
     case "AI":
     default:
         builder.Services.AddScoped<IPlantInfoService, AIPlantInfoService>();

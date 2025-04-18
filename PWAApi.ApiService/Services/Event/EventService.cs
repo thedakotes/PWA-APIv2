@@ -3,6 +3,7 @@ using API.DataTransferObjects;
 using API.Models;
 using OpenAI.Chat;
 using PWAApi.ApiService.Services.AI;
+using PWAApi.ApiService.Helpers;
 
 public class EventService : IEventService
 {
@@ -73,19 +74,9 @@ public class EventService : IEventService
 
     public async Task<List<EventDTO>> AICreateEvents(string eventDetails)
     {
-        var schema = JsonSchemaGenerator.GenerateJsonSchema<EventDTO>();
-        ChatCompletionOptions options = new()
-        {
-            ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
-                jsonSchemaFormatName: "event_parsing",
-                jsonSchema: BinaryData.FromBytes(System.Text.Encoding.UTF8.GetBytes(schema)),
-                jsonSchemaIsStrict: true)
-        };
-        var userMessages = new[]
-        {
-                new UserChatMessage($"Create an event for: '{eventDetails}'.")
-        };
-        var result = await _aiService.Ask<EventDTO>(options, userMessages);
+        ChatCompletionOptions options = OpenAIHelper.SetChatCompletionOptions<EventDTO>("event_parsing");
+        var userMessages = OpenAIHelper.SetUserChatMessages(new List<string>() { $"Create an event for: '{eventDetails}'." });
+        var result = await _aiService.Ask<EventDTO>(options, userMessages.Cast<ChatMessage>().ToList());
 
         return [result];
 

@@ -9,7 +9,8 @@ namespace PWAApi.ApiService.Services.AI
     {
         public Task<string> AskAI(string question);
 
-        public Task<T?> Ask<T>(ChatCompletionOptions options, UserChatMessage[] userChatMessages);
+        public Task<T?> Ask<T>(ChatCompletionOptions options, List<ChatMessage> chatMessages);
 
+        public Task<T?> Ask<T>(ChatCompletionOptions options, List<ChatMessage> chatMessages, Dictionary<string, Func<ChatToolCall, Task<ToolChatMessage>>> _toolHandlers);
     }
 }
