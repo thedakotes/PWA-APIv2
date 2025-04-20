@@ -5,7 +5,7 @@ namespace PWAApi.ApiService.Services
 {
     public class WikimediaService
     {
-        public async Task<IEnumerable<ImageDTO?>> GetImageFromWikimediaAsync(string searchTerm)
+        public async Task<IEnumerable<ImageDTO>?> GetImageFromWikimediaAsync(string searchTerm)
         {
             using var httpClient = new HttpClient();
 

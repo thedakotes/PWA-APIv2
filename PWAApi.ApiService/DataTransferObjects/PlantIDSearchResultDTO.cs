@@ -6,6 +6,9 @@ namespace PWAApi.ApiService.DataTransferObjects
     {
         public required string ScientificName { get; set; }
         public string? CommonName { get; set; }
-        public ImageDTO? Image { get; set; }
+        public required List<ImageDTO> Images { get; set; }
+
+        public PlantIDSearchResultDTO() { }
+
     }
 }

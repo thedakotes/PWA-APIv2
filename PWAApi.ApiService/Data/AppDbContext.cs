@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using API.Models;
+using PWAApi.ApiService.Models.Taxonomy;
 
 namespace EventApi.Data
 {
@@ -9,7 +10,14 @@ namespace EventApi.Data
         {
         }
 
-        public DbSet<Event> Events { get; set; } = null!; // null-forgiving operator to suppress warnings for uninitialized properties
+        public DbSet<Event> Events { get; set; } = null!;
+        public DbSet<Taxonomy> Taxonomy { get; set; } = null!;
+        public DbSet<VernacularName> VernacularNames { get; set; } = null!;
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseLazyLoadingProxies();
+        }
 
         public override int SaveChanges()
         {

@@ -1,7 +1,4 @@
-﻿using System.Globalization;
-using API.Services.PlantID;
-using CsvHelper;
-using CsvHelper.Configuration;
+﻿using API.Services.PlantID;
 using Microsoft.AspNetCore.Mvc;
 using PWAApi.ApiService.DataTransferObjects.PlantID;
 using PWAApi.ApiService.Services.PlantInfo;

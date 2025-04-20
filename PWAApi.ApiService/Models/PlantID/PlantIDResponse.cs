@@ -1,6 +1,4 @@
-﻿using PWAApi.ApiService.DataTransferObjects.PlantID;
-
-namespace PWAApi.ApiService.Models.PlantID
+﻿namespace PWAApi.ApiService.Models.PlantID
 {
     public class PlantIDResponse
     {
