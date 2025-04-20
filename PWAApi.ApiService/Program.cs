@@ -145,4 +145,7 @@ app.UseAuthorization();
 // But in ASP.NET Core 6+, the MapControllers method is sufficient to set up routing for attribute-routed controllers
 app.MapControllers();
 
+// Enable deployment debugging
+app.UseDeveloperExceptionPage();
+
 app.Run();
