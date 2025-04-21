@@ -14,7 +14,7 @@ namespace PWAApi.ApiService.Services.AI
         {
             //To get an API key, create an account here: https://auth.openai.com/
             //and then store it in your User Secrets for the project
-            apiKey = configuration["OpenAI:ApiKey"] ?? throw new ArgumentNullException("OpenAI:ApiKey missing");
+            apiKey = configuration["OpenAI_ApiKey"] ?? throw new ArgumentNullException("OpenAI ApiKey missing");
         }
 
         public async Task<string> AskAI(string question)
