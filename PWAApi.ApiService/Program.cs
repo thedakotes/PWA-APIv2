@@ -19,7 +19,7 @@ builder.AddServiceDefaults();
 builder.Services.AddHttpClient();
 
 //Distributed Cache where we can add/remove items to/from the Redis cache
-//builder.AddRedisDistributedCache("cache");
+builder.AddRedisDistributedCache("cache");
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
