@@ -105,10 +105,14 @@ builder.Services.Configure<FormOptions>(options =>
 
 var app = builder.Build();
 
-// Run all ISeeders on startup to populate tables with current data
+// Run all migrations/ISeeders on startup to populate tables with current data
 using (var scope = app.Services.CreateScope())
 {
+    // Run migrations
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+
+    // Run seeders after migrations
     var seedManager = scope.ServiceProvider.GetRequiredService<SeedManagerService>();
     await seedManager.RunAllAsync(db);
 }
