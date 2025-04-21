@@ -19,7 +19,7 @@ namespace API.Services.PlantID
 
         public PlantNetService(IHttpClientFactory httpClientFactory, IConfiguration config, TaxonomyRepository gbifPlantRepository, IMapper mapper, WikimediaService wikimediaService)
         {
-            _apiKey = config["PlantNet:ApiKey"] ?? throw new Exception("Plant Net API key is missing!");
+            _apiKey = config["PlantNet_ApiKey"] ?? throw new Exception("Plant Net API key is missing!");
             _httpClient = httpClientFactory.CreateClient();
             _gbifPlantRepository = gbifPlantRepository;
             _mapper = mapper;
