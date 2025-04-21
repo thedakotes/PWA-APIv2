@@ -120,12 +120,12 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 app.UseExceptionHandler();
 
+// Enable Swagger
+app.UseSwagger();
+app.UseSwaggerUI();
+
 if (app.Environment.IsDevelopment())
 {
-    // Enable Swagger (only for development or debugging)
-    app.UseSwagger();
-    app.UseSwaggerUI();
-
     // Check AutoMapper configuration
     try
     {
