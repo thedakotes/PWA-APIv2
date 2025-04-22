@@ -1,29 +1,25 @@
 ﻿using System.Text.Json;
 using AutoMapper;
-using PWAApi.ApiService.DataTransferObjects;
 using PWAApi.ApiService.DataTransferObjects.PlantID;
 using PWAApi.ApiService.Models.PlantID.PlantNet;
 using PWAApi.ApiService.Repositories;
 using PWAApi.ApiService.Services;
+using PWAApi.ApiService.Services.PlantID;
 
 namespace API.Services.PlantID
 {
-    public class PlantNetService : IPlantIDService
+    public class PlantNetService : PlantIDServiceBase, IPlantIDService
     {
         private readonly string _apiKey;
         private readonly HttpClient _httpClient;
         private readonly IMapper _mapper;
-        private readonly TaxonomyRepository _gbifPlantRepository;
-        private readonly WikimediaService _wikimediaService;
         private string url = "https://my-api.plantnet.org/v2/identify/all";
 
-        public PlantNetService(IHttpClientFactory httpClientFactory, IConfiguration config, TaxonomyRepository gbifPlantRepository, IMapper mapper, WikimediaService wikimediaService)
+        public PlantNetService(IHttpClientFactory httpClientFactory, IConfiguration config, TaxonomyRepository taxonomyRepository, IMapper mapper, WikimediaService wikimediaService) : base(taxonomyRepository, wikimediaService)
         {
             _apiKey = config["PlantNet_ApiKey"] ?? throw new Exception("Plant Net API key is missing!");
             _httpClient = httpClientFactory.CreateClient();
-            _gbifPlantRepository = gbifPlantRepository;
             _mapper = mapper;
-            _wikimediaService = wikimediaService;
         }
 
         public async Task<IEnumerable<PlantIDDTO>> IdentifyPlantAsync(List<IFormFile> files)
@@ -45,39 +41,6 @@ namespace API.Services.PlantID
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task<IEnumerable<PlantIDSearchResultDTO>?> IdentifyPlantAsync(string searchTerm)
-        {
-            List<PlantIDSearchResultDTO> results = new List<PlantIDSearchResultDTO>();
-
-            try
-            {
-                var searchResults = await _gbifPlantRepository.Search(searchTerm);
-
-                foreach (var searchResult in searchResults)
-                {
-                    var imageDTO = await _wikimediaService.GetImageFromWikimediaAsync(searchResult.ScientificName);
-                    if (imageDTO != null)
-                    {
-                        PlantIDSearchResultDTO dto = new PlantIDSearchResultDTO
-                        { 
-                            ScientificName = searchResult.ScientificName, 
-                            CommonName = "", 
-                            Images = imageDTO.ToList() 
-                        };
-
-                        results.Add(dto);
-                    }
-                }
-
-                return results;
-
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error encountered while searching for: {searchTerm}. Error: {ex.Message}");
             }
         }
 
@@ -113,12 +76,6 @@ namespace API.Services.PlantID
 
             content.Add(streamContent, "images", file.FileName);
             content.Add(new StringContent("flower"), "organs");
-        }
-
-        private async Task<ImageDTO?> GetImageDTO(string searchTerm)
-        {
-            var imageDTOs = await _wikimediaService.GetImageFromWikimediaAsync(searchTerm);
-            return imageDTOs?.FirstOrDefault();
         }
     }
 }

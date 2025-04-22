@@ -18,7 +18,7 @@ builder.AddServiceDefaults();
 // Configure the HTTP request pipeline.
 builder.Services.AddHttpClient();
 
-//Distributed Cache where we can add/remove items to/from the Redis cache
+// Distributed Cache where we can add/remove items to/from the Redis cache
 builder.AddRedisDistributedCache("cache");
 
 // Add services to the container.
