@@ -6,33 +6,27 @@ using PWAApi.ApiService.Models.PlantID.PlantNet;
 using PWAApi.ApiService.Repositories;
 using PWAApi.ApiService.Services;
 using PWAApi.ApiService.Services.Caching;
+using PWAApi.ApiService.Services.PlantID;
 
 namespace API.Services.PlantID
 {
-    public class PlantNetService : IPlantIDService
+    public class PlantNetService : PlantIDServiceBase, IPlantIDService
     {
         private readonly string _apiKey;
         private readonly HttpClient _httpClient;
         private readonly IMapper _mapper;
-        private readonly TaxonomyRepository _gbifPlantRepository;
-        private readonly WikimediaService _wikimediaService;
-        private readonly ICacheService _cacheService;
         private string url = "https://my-api.plantnet.org/v2/identify/all";
-        private const string PlantNetCacheKey = "plant-net";
 
         public PlantNetService(IHttpClientFactory httpClientFactory, 
             IConfiguration config, 
-            TaxonomyRepository gbifPlantRepository, 
+            TaxonomyRepository taxonomyRepository, 
             IMapper mapper, 
             WikimediaService wikimediaService,
-            ICacheService cacheService)
+            ICacheService cacheService) : base(cacheService, taxonomyRepository, wikimediaService)
         {
             _apiKey = config["PlantNet_ApiKey"] ?? throw new Exception("Plant Net API key is missing!");
             _httpClient = httpClientFactory.CreateClient();
-            _gbifPlantRepository = gbifPlantRepository;
             _mapper = mapper;
-            _wikimediaService = wikimediaService;
-            _cacheService = cacheService;
         }
 
         public async Task<IEnumerable<PlantIDDTO>> IdentifyPlantAsync(List<IFormFile> files)
@@ -54,45 +48,6 @@ namespace API.Services.PlantID
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task<IEnumerable<PlantIDSearchResultDTO>?> IdentifyPlantAsync(string searchTerm)
-        {
-            List<PlantIDSearchResultDTO> results = new List<PlantIDSearchResultDTO>();
-
-            try
-            {
-                var cacheKey = $"{PlantNetCacheKey}:{searchTerm}";
-                var cached = await _cacheService.GetAsync<IEnumerable<PlantIDSearchResultDTO>>(cacheKey);
-                if (cached != null && cached?.Count() != 0)
-                    return cached;
-
-                var searchResults = await _gbifPlantRepository.Search(searchTerm);
-
-                foreach (var searchResult in searchResults)
-                {
-                    var imageDTO = await _wikimediaService.GetImageFromWikimediaAsync(searchResult.ScientificName);
-                    if (imageDTO != null)
-                    {
-                        PlantIDSearchResultDTO dto = new PlantIDSearchResultDTO
-                        { 
-                            ScientificName = searchResult.ScientificName, 
-                            CommonName = "", 
-                            Images = imageDTO.ToList() 
-                        };
-
-                        results.Add(dto);
-                    }
-                }
-
-                await _cacheService.SetAsync(cacheKey, results, TimeSpan.FromMinutes(10));
-                return results;
-
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error encountered while searching for: {searchTerm}. Error: {ex.Message}");
             }
         }
 
