@@ -7,8 +7,10 @@ using PWAApi.ApiService.Helpers.Seeders;
 using PWAApi.ApiService.Repositories;
 using PWAApi.ApiService.Services;
 using PWAApi.ApiService.Services.AI;
+using PWAApi.ApiService.Services.Caching;
 using PWAApi.ApiService.Services.DbContext;
 using PWAApi.ApiService.Services.PlantInfo;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,8 +20,8 @@ builder.AddServiceDefaults();
 // Configure the HTTP request pipeline.
 builder.Services.AddHttpClient();
 
-// Distributed Cache where we can add/remove items to/from the Redis cache
-builder.AddRedisDistributedCache("cache");
+//Distributed Cache where we can add/remove items to/from the Redis cache
+builder.AddRedisDistributedCache("redis");
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
@@ -30,12 +32,29 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         .UseLazyLoadingProxies()
         .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var redisConnection = config.GetConnectionString("redis"); // dynamic port auto-injected
+
+    if (string.IsNullOrEmpty(redisConnection))
+    {
+        throw new InvalidOperationException("Redis connection string is not configured.");
+    }
+
+    return ConnectionMultiplexer.Connect(redisConnection);
+});
+
+builder.Services.AddScoped<ICacheService, RedisCacheService>();
+
+
 // Register AutoMapper (scanning all assemblies for profiles)
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 #region Services
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IAIService, OpenAIService>();
+builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
 // Seeders
 builder.Services.AddScoped<ISeeder, TaxonomySeeder>();

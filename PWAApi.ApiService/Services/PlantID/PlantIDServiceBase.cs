@@ -1,5 +1,6 @@
 ﻿using PWAApi.ApiService.DataTransferObjects;
 using PWAApi.ApiService.Repositories;
+using PWAApi.ApiService.Services.Caching;
 
 namespace PWAApi.ApiService.Services.PlantID
 {
@@ -7,13 +8,18 @@ namespace PWAApi.ApiService.Services.PlantID
     {
         protected readonly TaxonomyRepository _taxonomyRepository;
         protected readonly WikimediaService _wikimediaService;
+        private const string PlantNetCacheKey = "plant-net";
+        private readonly ICacheService _cacheService;
+
 
         public PlantIDServiceBase(
+            ICacheService cacheService,
             TaxonomyRepository taxonomyRepository,
             WikimediaService wikiMediaService)
         {
             _taxonomyRepository = taxonomyRepository;
             _wikimediaService = wikiMediaService;
+            _cacheService = cacheService;
         }
 
         public async Task<IEnumerable<PlantIDSearchResultDTO>?> IdentifyPlantAsync(string searchTerm)
@@ -22,6 +28,11 @@ namespace PWAApi.ApiService.Services.PlantID
 
             try
             {
+                var cacheKey = $"{PlantNetCacheKey}:{searchTerm}";
+                var cached = await _cacheService.GetAsync<IEnumerable<PlantIDSearchResultDTO>>(cacheKey);
+                if (cached != null && cached?.Count() != 0)
+                    return cached;
+
                 var searchResults = await _taxonomyRepository.Search(searchTerm);
 
                 foreach (var searchResult in searchResults)
@@ -32,7 +43,7 @@ namespace PWAApi.ApiService.Services.PlantID
                         PlantIDSearchResultDTO dto = new PlantIDSearchResultDTO
                         {
                             ScientificName = searchResult.ScientificName,
-                            CommonName = string.Join(", ", searchResult.VernacularNames.Select(x => x.Name)),
+                            CommonName = "",
                             Images = imageDTO.ToList()
                         };
 
@@ -40,6 +51,7 @@ namespace PWAApi.ApiService.Services.PlantID
                     }
                 }
 
+                await _cacheService.SetAsync(cacheKey, results, TimeSpan.FromMinutes(10));
                 return results;
 
             }
