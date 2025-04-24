@@ -5,6 +5,7 @@ using PWAApi.ApiService.DataTransferObjects.PlantID;
 using PWAApi.ApiService.Models.PlantID.PlantNet;
 using PWAApi.ApiService.Repositories;
 using PWAApi.ApiService.Services;
+using PWAApi.ApiService.Services.Caching;
 
 namespace API.Services.PlantID
 {
@@ -15,15 +16,23 @@ namespace API.Services.PlantID
         private readonly IMapper _mapper;
         private readonly TaxonomyRepository _gbifPlantRepository;
         private readonly WikimediaService _wikimediaService;
+        private readonly ICacheService _cacheService;
         private string url = "https://my-api.plantnet.org/v2/identify/all";
+        private const string PlantNetCacheKey = "plant-net";
 
-        public PlantNetService(IHttpClientFactory httpClientFactory, IConfiguration config, TaxonomyRepository gbifPlantRepository, IMapper mapper, WikimediaService wikimediaService)
+        public PlantNetService(IHttpClientFactory httpClientFactory, 
+            IConfiguration config, 
+            TaxonomyRepository gbifPlantRepository, 
+            IMapper mapper, 
+            WikimediaService wikimediaService,
+            ICacheService cacheService)
         {
             _apiKey = config["PlantNet_ApiKey"] ?? throw new Exception("Plant Net API key is missing!");
             _httpClient = httpClientFactory.CreateClient();
             _gbifPlantRepository = gbifPlantRepository;
             _mapper = mapper;
             _wikimediaService = wikimediaService;
+            _cacheService = cacheService;
         }
 
         public async Task<IEnumerable<PlantIDDTO>> IdentifyPlantAsync(List<IFormFile> files)
@@ -54,6 +63,11 @@ namespace API.Services.PlantID
 
             try
             {
+                var cacheKey = $"{PlantNetCacheKey}:{searchTerm}";
+                var cached = await _cacheService.GetAsync<IEnumerable<PlantIDSearchResultDTO>>(cacheKey);
+                if (cached != null && cached?.Count() != 0)
+                    return cached;
+
                 var searchResults = await _gbifPlantRepository.Search(searchTerm);
 
                 foreach (var searchResult in searchResults)
@@ -72,6 +86,7 @@ namespace API.Services.PlantID
                     }
                 }
 
+                await _cacheService.SetAsync(cacheKey, results, TimeSpan.FromMinutes(10));
                 return results;
 
             }
