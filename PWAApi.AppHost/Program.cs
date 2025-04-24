@@ -8,7 +8,7 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
 //Marking redis as Persistent so that it doesn't get deleted when the container is stopped. Also makes it faster to start up
-var cache = builder.AddRedis("redis")
+var cache = builder.AddRedis("cache")
     .WithLifetime(ContainerLifetime.Persistent)
     .WithRedisInsight();
 

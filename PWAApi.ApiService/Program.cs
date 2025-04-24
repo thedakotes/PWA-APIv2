@@ -21,7 +21,7 @@ builder.AddServiceDefaults();
 builder.Services.AddHttpClient();
 
 //Distributed Cache where we can add/remove items to/from the Redis cache
-builder.AddRedisDistributedCache("redis");
+builder.AddRedisDistributedCache("cache");
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
@@ -35,7 +35,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
-    var redisConnection = config.GetConnectionString("redis"); // dynamic port auto-injected
+    var redisConnection = config.GetConnectionString("cache"); // dynamic port auto-injected
 
     if (string.IsNullOrEmpty(redisConnection))
     {
