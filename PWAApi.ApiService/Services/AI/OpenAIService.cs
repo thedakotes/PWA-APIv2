@@ -12,8 +12,8 @@ namespace PWAApi.ApiService.Services.AI
 
         public OpenAIService(IConfiguration configuration)
         {
-            //To get an API key, create an account here: https://auth.openai.com/
-            //and then store it in your User Secrets for the project
+            // To get an API key, create an account here: https://auth.openai.com/
+            // and then store it in your User Secrets for the project
             apiKey = configuration["OpenAI_ApiKey"] ?? throw new ArgumentNullException("OpenAI ApiKey missing");
         }
 

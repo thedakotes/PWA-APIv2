@@ -54,9 +54,16 @@ namespace PWAApi.ApiService.Helpers
                     else
                     {
                         // Handle primitive types
-                        schema.properties[property.Name] = new
+                        schema.properties[property.Name] = propertyType.IsEnum ? new
                         {
-                            type = GetJsonType(propertyType)
+                            type = GetJsonType(propertyType),
+                            description = property.GetCustomAttribute<AIDescriptionAttribute>()?.Description ?? "",
+                            @enum = Enum.GetNames(propertyType)
+                        } :
+                        new
+                        {
+                            type = GetJsonType(propertyType),
+                            description = property.GetCustomAttribute<AIDescriptionAttribute>()?.Description ?? ""
                         };
                     }
 
@@ -96,8 +103,9 @@ namespace PWAApi.ApiService.Helpers
             if (type == typeof(int) || type == typeof(long)) return "integer";
             if (type == typeof(float) || type == typeof(double) || type == typeof(decimal)) return "number";
             if (type == typeof(bool)) return "boolean";
+            if (type.IsEnum) return "string";
             if (type.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(type)) return "array";
-            if (type.IsClass) return "object";
+            if (type.IsClass || (type.IsValueType && !type.IsPrimitive && Nullable.GetUnderlyingType(type) == null)) return "object";
 
             return "string"; // Default to string for unknown types
         }
@@ -135,7 +143,7 @@ namespace PWAApi.ApiService.Helpers
         private static bool IsComplexType(Type type)
         {
             // Check if the type is a complex type (e.g., class, struct) but not a primitive or string
-            return type.IsClass && type != typeof(string);
+            return (type.IsClass || (type.IsValueType && !type.IsPrimitive)) && type != typeof(string) && !type.IsEnum;
         }
     }
 }
