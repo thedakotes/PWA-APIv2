@@ -57,6 +57,13 @@ namespace PWAApi.ApiService.DataTransferObjects.PlantID
         public DimensionDTO Width { get; set; }
     }
 
+    public class PlantMetadataDTO
+    {
+        public string ScientificName { get; set; } = string.Empty;
+        public string CommonName { get; set; } = string.Empty;
+        public int TaxonKey { get; set; }
+    }
+
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum RequirementLevel
     {
