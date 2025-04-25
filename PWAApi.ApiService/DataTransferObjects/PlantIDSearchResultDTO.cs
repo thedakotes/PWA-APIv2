@@ -4,11 +4,15 @@ namespace PWAApi.ApiService.DataTransferObjects
 {
     public class PlantIDSearchResultDTO
     {
-        public required string ScientificName { get; set; }
+        public string ScientificName { get; set; } = string.Empty;
         public string? CommonName { get; set; }
-        public required List<ImageDTO> Images { get; set; }
+        public List<ImageDTO>? Images { get; set; }
 
-        public PlantIDSearchResultDTO() { }
+        public PlantIDSearchResultDTO(string scientificName, string commonName) 
+        {
+            ScientificName = scientificName;
+            CommonName = commonName;
+        }
 
     }
 }

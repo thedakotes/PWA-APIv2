@@ -1,4 +1,7 @@
-﻿using PWAApi.ApiService.DataTransferObjects;
+﻿using System.Security.AccessControl;
+using Microsoft.OpenApi.Services;
+using PWAApi.ApiService.DataTransferObjects;
+using PWAApi.ApiService.Models.Taxonomy;
 using PWAApi.ApiService.Repositories;
 using PWAApi.ApiService.Services.Caching;
 
@@ -24,8 +27,6 @@ namespace PWAApi.ApiService.Services.PlantID
 
         public async Task<IEnumerable<PlantIDSearchResultDTO>?> IdentifyPlantAsync(string searchTerm)
         {
-            List<PlantIDSearchResultDTO> results = new List<PlantIDSearchResultDTO>();
-
             try
             {
                 var cacheKey = $"{PlantNetCacheKey}:{searchTerm}";
@@ -35,22 +36,14 @@ namespace PWAApi.ApiService.Services.PlantID
 
                 var searchResults = await _taxonomyRepository.Search(searchTerm);
 
+                List<Task<PlantIDSearchResultDTO>> tasks = new List<Task<PlantIDSearchResultDTO>>();
+
                 foreach (var searchResult in searchResults)
                 {
-                    var imageDTO = await _wikimediaService.GetImageFromWikimediaAsync(searchResult.ScientificName);
-                    if (imageDTO != null)
-                    {
-                        PlantIDSearchResultDTO dto = new PlantIDSearchResultDTO
-                        {
-                            ScientificName = searchResult.ScientificName,
-                            CommonName = "",
-                            Images = imageDTO.ToList()
-                        };
-
-                        results.Add(dto);
-                    }
+                    tasks.Add(Set(searchResult));
                 }
 
+                List<PlantIDSearchResultDTO> results = (await Task.WhenAll(tasks)).ToList();
                 await _cacheService.SetAsync(cacheKey, results, TimeSpan.FromMinutes(10));
                 return results;
 
@@ -59,6 +52,20 @@ namespace PWAApi.ApiService.Services.PlantID
             {
                 throw new Exception($"Error encountered while searching for: {searchTerm}. Error: {ex.Message}");
             }
+        }
+
+        private async Task<PlantIDSearchResultDTO> Set(Taxonomy taxonomy)
+        {
+            PlantIDSearchResultDTO dto = new PlantIDSearchResultDTO(taxonomy.ScientificName, string.Join(", ", taxonomy.VernacularNames.Select(x => x.Name)));
+
+            var imageResults = await _wikimediaService.GetImageFromWikimediaAsync(taxonomy.ScientificName);
+            if (imageResults != null)
+            {
+                dto.Images = imageResults.ToList();
+
+            }
+
+            return dto;
         }
     }
 }
