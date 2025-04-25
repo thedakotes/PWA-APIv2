@@ -22,9 +22,6 @@ namespace PWAApi.ApiService.Services.PlantInfo
         protected async Task<T> FetchPlantSpeciesAsync<T>(string requestUrl, HttpMethod httpMethod, params (string key, string value)[] headers)
         {
             var request = new HttpRequestMessage(httpMethod, requestUrl);
-            ArrayList results = new ArrayList();
-            results.Add(_apiKey);
-            results.Add(_httpClient);
 
             foreach (var header in headers)
             {

@@ -16,7 +16,18 @@ namespace PWAApi.ApiService.Helpers
             // Start building the JSON schema
             if (!IsCollection(type) && !IsComplexType(type))
             {
-                return new { type = GetJsonType(type) };
+                return type.IsEnum ? new
+                {
+                    type = GetJsonType(type),
+                    description = type.GetCustomAttribute<AIDescriptionAttribute>()?.Description ?? "",
+                    @enum = Enum.GetNames(type)
+                } 
+                :
+                new
+                {
+                    type = GetJsonType(type),
+                    description = type.GetCustomAttribute<AIDescriptionAttribute>()?.Description ?? ""
+                }; ;
             }
             else if (!IsCollection(type))
             {

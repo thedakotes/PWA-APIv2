@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using PWAApi.ApiService.DataTransferObjects;
 using PWAApi.ApiService.DataTransferObjects.PlantID;
+using PWAApi.ApiService.Models.Taxonomy;
 using PWAApi.ApiService.Repositories;
 using PWAApi.ApiService.Services.Caching;
 
@@ -44,7 +45,7 @@ namespace PWAApi.ApiService.Services.PlantID
         }
 
         public async Task<IEnumerable<PlantIDSearchResultDTO>?> IdentifyPlantAsync(string searchTerm)
-        {  
+        {
             Console.WriteLine($"[PlantID] Search for '{searchTerm}' started.");
 
             var metadataCacheKey = $"{PlantNetCacheKey}:search:{searchTerm}";
@@ -61,7 +62,7 @@ namespace PWAApi.ApiService.Services.PlantID
             }
 
             return await FetchAndCacheSearchResultsAsync(searchTerm, metadataCacheKey);
-            
+
         }
 
         private async Task<IEnumerable<PlantIDSearchResultDTO>> BuildFullResultsFromMetadataAsync(IEnumerable<PlantMetadataDTO> metadata)
@@ -72,10 +73,10 @@ namespace PWAApi.ApiService.Services.PlantID
             {
                 var imageKey = $"{PlantNetCacheKey}:image:{meta.TaxonKey}";
                 var images = await _cacheService.GetAsync<List<ImageDTO>>(imageKey)
-                                //This extra part will cause problems if we want to change the caching strategy to also include plants that have no
-                                //images, because every time we pull from the cache, we'll also do this call for all our missing images. 
-                                //I have this here in case something went bananas, but it's possible we can remove this call entirely
-                             ?? await _wikimediaService.GetImageFromWikimediaAsync(meta.ScientificName); 
+                             //This extra part will cause problems if we want to change the caching strategy to also include plants that have no
+                             //images, because every time we pull from the cache, we'll also do this call for all our missing images. 
+                             //I have this here in case something went bananas, but it's possible we can remove this call entirely
+                             ?? await _wikimediaService.GetImageFromWikimediaAsync(meta.ScientificName);
 
                 if (images != null)
                 {
@@ -127,7 +128,7 @@ namespace PWAApi.ApiService.Services.PlantID
                             results.Add(new PlantIDSearchResultDTO
                             {
                                 ScientificName = item.ScientificName,
-                                CommonName = "", // Enhance later
+                                CommonName = string.Join(", ", item.VernacularNames.Select(x => x.Name)),
                                 Images = images.ToList()
                             });
 

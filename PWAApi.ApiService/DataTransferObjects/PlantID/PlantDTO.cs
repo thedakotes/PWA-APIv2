@@ -27,14 +27,13 @@ namespace PWAApi.ApiService.DataTransferObjects.PlantID
 
         public string SoilType { get; set; } = string.Empty;
 
-        public List<string> WateringPeriods { get; set;} = new List<string>();
+        [AIDescription("Preferred time of day for watering.")]
+        public WateringPeriod[] WateringPeriods { get; set;} = Array.Empty<WateringPeriod>();
 
         [AIDescription("The level of care required for the plant")]
         public RequirementLevel CareRequirement { get; set; } = RequirementLevel.VeryLow;
 
         public RequirementLevel LightRequirement { get; set; } = RequirementLevel.VeryLow;
-
-        public RequirementLevel MaintenanceRequirement { get; set; } = RequirementLevel.VeryLow;
 
         public RequirementLevel WaterRequirement { get; set; } = RequirementLevel.VeryLow;
 
@@ -72,6 +71,17 @@ namespace PWAApi.ApiService.DataTransferObjects.PlantID
         Medium = 2,
         High = 3,
         VeryHigh = 5
+    }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum WateringPeriod
+    {
+        EarlyMorning = 0,
+        Morning = 1,
+        Midday = 2,
+        Afternoon = 3,
+        LateAfternoon = 4,
+        Night = 5
     }
 
     public record AnatomicalPart(string Name, List<string> Colors);
