@@ -8,11 +8,5 @@ namespace PWAApi.ApiService.DataTransferObjects
         public string? CommonName { get; set; }
         public List<ImageDTO>? Images { get; set; }
 
-        public PlantIDSearchResultDTO(string scientificName, string commonName) 
-        {
-            ScientificName = scientificName;
-            CommonName = commonName;
-        }
-
     }
 }

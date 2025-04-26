@@ -29,6 +29,9 @@ namespace PWAApi.ApiService.Services.Caching
          *  
          *  > get [keyname]
          *  
+         * If you want to delete all your keys and start over (without waiting for the timeout), do:
+         * 
+         *  > flushall
          * */
         private readonly IConnectionMultiplexer _redis;
         private readonly IDatabase _db;
