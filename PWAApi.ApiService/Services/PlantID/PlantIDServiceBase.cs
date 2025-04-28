@@ -109,7 +109,6 @@ namespace PWAApi.ApiService.Services.PlantID
                 Console.WriteLine($"[PlantID] Found {searchResults.Count()} taxa for {searchTerm}.");
                 Console.WriteLine($"[PlantID] Getting images for {searchResults.Count()} records...");
 
-                //This all seemed to go faster than in the previous for loop. If you disagree, we can change it.
                 var tasks = searchResults.Select(async item =>
                 {
                     await semaphore.WaitAsync();

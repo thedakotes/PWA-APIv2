@@ -19,7 +19,11 @@ namespace PWAApi.ApiService.Repositories
                     x.Genus.Contains(searchTerm) ||
                     x.Family.Contains(searchTerm) ||
                     x.VernacularNames.Any(vernacularName => EF.Functions.Like(vernacularName.Name, $"%{searchTerm}%"))
-                ).ToListAsync();
+                )
+                .OrderBy(x => x.ScientificName)
+                .ThenBy(x => x.Genus)
+                .ThenBy(x => x.Family)
+                .ToListAsync();
         }
     }
 }
