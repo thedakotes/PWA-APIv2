@@ -1,14 +1,14 @@
 # PWA-APIv2
 
-A .NET Aspire version of Dakota's PWA-API project (https://github.com/thedakotes/PWA-API). 
+.NET backend for PWA-Web (uses .NET Aspire for orchestration)
 
 Prereqs:
 
 - Visual Studio 2022
 - Docker (https://www.docker.com)
-- Web project from Dakota's repo (https://github.com/thedakotes/PWA-Web)
+- Web project from this repo: https://github.com/dakotalantrip/PWA-Web
 
-This project needs to live (for now) at the same level of the PWA-Web folder (https://github.com/thedakotes/PWA-Web)
+This project needs to live (for now) at the same level of the PWA-Web folder (https://github.com/dakotalantrip/PWA-Web)
 
 Docker needs to be running on your desktop prior to running the project.
 Set the startup project to be PWAApi.AppHost and click the 'https' button. 
