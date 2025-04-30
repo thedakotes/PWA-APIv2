@@ -1,5 +1,7 @@
 ﻿using EventApi.Data;
 using Microsoft.EntityFrameworkCore;
+using PWAApi.ApiService.Extensions;
+using PWAApi.ApiService.Models;
 using PWAApi.ApiService.Models.Taxonomy;
 
 namespace PWAApi.ApiService.Repositories
@@ -8,7 +10,7 @@ namespace PWAApi.ApiService.Repositories
     {
         public TaxonomyRepository(AppDbContext appDbContext) : base(appDbContext) { }
 
-        public async Task<IEnumerable<Taxonomy>> Search(string searchTerm)
+        public async Task<PaginatedResult<Taxonomy>> Search(string searchTerm, int page, int pageSize)
         {
             return await _context.Taxonomy
                 .Include(x => x.VernacularNames)
@@ -20,10 +22,11 @@ namespace PWAApi.ApiService.Repositories
                     x.Family.Contains(searchTerm) ||
                     x.VernacularNames.Any(vernacularName => EF.Functions.Like(vernacularName.Name, $"%{searchTerm}%"))
                 )
+                .Distinct()
                 .OrderBy(x => x.ScientificName)
                 .ThenBy(x => x.Genus)
                 .ThenBy(x => x.Family)
-                .ToListAsync();
+                .ToPaginatedResultAsync(page, pageSize);
         }
     }
 }

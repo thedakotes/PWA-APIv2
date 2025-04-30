@@ -59,7 +59,7 @@ namespace PWAApi.ApiService.DataTransferObjects.PlantID
     public class PlantMetadataDTO
     {
         public string ScientificName { get; set; } = string.Empty;
-        public string CommonName { get; set; } = string.Empty;
+        public List<string> CommonNames { get; set; } = new List<string>();
         public int TaxonKey { get; set; }
     }
 

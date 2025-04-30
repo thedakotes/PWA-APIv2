@@ -57,7 +57,7 @@ namespace API.Controllers
         }
 
         [HttpGet("Identify/{species}")]
-        public async Task<IActionResult> Identify(string species)
+        public async Task<IActionResult> Identify(string species, int page, int pageSize)
         {
             if (string.IsNullOrEmpty(species))
             {
@@ -66,7 +66,7 @@ namespace API.Controllers
 
             try
             {
-                var result = await _plantIDService.IdentifyPlantAsync(species);
+                var result = await _plantIDService.IdentifyPlantAsync(species, page, pageSize);
                 return Ok(result);
             }
             catch (Exception ex)

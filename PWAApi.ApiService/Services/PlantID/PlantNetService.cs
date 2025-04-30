@@ -84,11 +84,5 @@ namespace API.Services.PlantID
             content.Add(streamContent, "images", file.FileName);
             content.Add(new StringContent("flower"), "organs");
         }
-
-        private async Task<ImageDTO?> GetImageDTO(string searchTerm)
-        {
-            var imageDTOs = await _wikimediaService.GetImageFromWikimediaAsync(searchTerm);
-            return imageDTOs?.FirstOrDefault();
-        }
     }
 }
