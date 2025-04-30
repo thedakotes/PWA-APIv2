@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
-using PWAApi.ApiService.DataTransferObjects;
 using PWAApi.ApiService.DataTransferObjects.PlantID;
+using PWAApi.ApiService.Models;
 using PWAApi.ApiService.Models.Taxonomy;
 using PWAApi.ApiService.Repositories;
 using PWAApi.ApiService.Services.Caching;
@@ -44,14 +44,14 @@ namespace PWAApi.ApiService.Services.PlantID
             _cacheService = cacheService;
         }
 
-        public async Task<IEnumerable<PlantIDSearchResultDTO>?> IdentifyPlantAsync(string searchTerm)
+        public async Task<PaginatedResult<PlantIDSearchResultDTO>?> IdentifyPlantAsync(string searchTerm, int page, int pageSize)
         {
             Console.WriteLine($"[PlantID] Search for '{searchTerm}' started.");
 
-            var metadataCacheKey = $"{PlantNetCacheKey}:search:{searchTerm}";
+            var metadataCacheKey = $"{PlantNetCacheKey}:search:{searchTerm}:page{page}";
             var metadata = await _cacheService.GetAsync<IEnumerable<PlantMetadataDTO>>(metadataCacheKey);
 
-            //If we found any cached data for this search term, grab it along with all of the iamges
+            //If we found any cached data for this search term, grab it along with all of the images
             if (metadata != null && metadata.Any())
             {
                 //Refresh our searchTerm cache key TTL. We could add an option to do this optionally in the future
@@ -61,11 +61,11 @@ namespace PWAApi.ApiService.Services.PlantID
                 return await BuildFullResultsFromMetadataAsync(metadata);
             }
 
-            return await FetchAndCacheSearchResultsAsync(searchTerm, metadataCacheKey);
+            return await FetchAndCacheSearchResultsAsync(searchTerm, metadataCacheKey, page, pageSize);
 
         }
 
-        private async Task<IEnumerable<PlantIDSearchResultDTO>> BuildFullResultsFromMetadataAsync(IEnumerable<PlantMetadataDTO> metadata)
+        private async Task<PaginatedResult<PlantIDSearchResultDTO>> BuildFullResultsFromMetadataAsync(IEnumerable<PlantMetadataDTO> metadata)
         {
             var results = new List<PlantIDSearchResultDTO>();
 
@@ -86,78 +86,97 @@ namespace PWAApi.ApiService.Services.PlantID
                     results.Add(new PlantIDSearchResultDTO
                     {
                         ScientificName = meta.ScientificName,
-                        CommonName = meta.CommonName,
+                        CommonNames = meta.CommonNames,
                         Images = images.ToList()
                     });
                 }
             }
 
-            return results;
+            return new PaginatedResult<PlantIDSearchResultDTO>() 
+            {
+                Items = results,
+            };
         }
 
-        private async Task<IEnumerable<PlantIDSearchResultDTO>> FetchAndCacheSearchResultsAsync(string searchTerm, string metadataKey)
+        private async Task<PaginatedResult<PlantIDSearchResultDTO>> FetchAndCacheSearchResultsAsync(string searchTerm, string metadataKey, int page, int pageSize)
         {
-            var searchResults = await _taxonomyRepository.Search(searchTerm);
-            var results = new ConcurrentBag<PlantIDSearchResultDTO>();
-            var metadataList = new List<PlantMetadataDTO>();
-            var semaphore = new SemaphoreSlim(10);
-
-            int plantsWithoutImages = 0;
-
-            if (searchResults?.Count() > 0)
+            try
             {
-                Console.WriteLine($"[PlantID] Found {searchResults.Count()} taxa for {searchTerm}.");
-                Console.WriteLine($"[PlantID] Getting images for {searchResults.Count()} records...");
+                var paginatedResult = await _taxonomyRepository.Search(searchTerm, page, pageSize);
+                var searchResults = paginatedResult.Items;
+                var results = new ConcurrentBag<PlantIDSearchResultDTO>();
+                var metadataList = new List<PlantMetadataDTO>();
+                var semaphore = new SemaphoreSlim(10);
 
-                //This all seemed to go faster than in the previous for loop. If you disagree, we can change it.
-                var tasks = searchResults.Select(async item =>
+                int plantsWithoutImages = 0;
+
+                if (paginatedResult.Items.Count() > 0)
                 {
-                    await semaphore.WaitAsync();
-                    try
+                    Console.WriteLine($"[PlantID] Found {searchResults.Count()} taxa for {searchTerm}.");
+                    Console.WriteLine($"[PlantID] Getting images for {searchResults.Count()} records...");
+
+                    var tasks = searchResults.Select(async item =>
                     {
-                        var images = await _wikimediaService.GetImageFromWikimediaAsync(item.ScientificName);
-                        if (images != null && images.Any())
+                        await semaphore.WaitAsync();
+                        try
                         {
-                            metadataList.Add(new PlantMetadataDTO
+                            var images = await _wikimediaService.GetImageFromWikimediaAsync(item.ScientificName);
+                            if (images != null && images.Any())
                             {
-                                ScientificName = item.ScientificName,
-                                CommonName = "",
-                                TaxonKey = item.TaxonKey
-                            });
+                                var commonNames = item.VernacularNames.Select(x => x.Name).ToList();
+                                metadataList.Add(new PlantMetadataDTO
+                                {
+                                    ScientificName = item.ScientificName,
+                                    CommonNames = commonNames,
+                                    TaxonKey = item.TaxonKey
+                                });
 
-                            results.Add(new PlantIDSearchResultDTO
+                                results.Add(new PlantIDSearchResultDTO
+                                {
+                                    ScientificName = item.ScientificName,
+                                    CommonNames = commonNames,
+                                    Images = images.ToList()
+                                });
+
+                                var imageKey = $"{PlantNetCacheKey}:image:{item.TaxonKey}";
+                                await _cacheService.SetAsync(imageKey, images, TimeSpan.FromHours(1));
+                            }
+                            else
                             {
-                                ScientificName = item.ScientificName,
-                                CommonName = string.Join(", ", item.VernacularNames.Select(x => x.Name)),
-                                Images = images.ToList()
-                            });
-
-                            var imageKey = $"{PlantNetCacheKey}:image:{item.TaxonKey}";
-                            await _cacheService.SetAsync(imageKey, images, TimeSpan.FromHours(1));
+                                Interlocked.Increment(ref plantsWithoutImages);
+                            }
                         }
-                        else
+                        finally
                         {
-                            System.Threading.Interlocked.Increment(ref plantsWithoutImages);
+                            semaphore.Release();
                         }
-                    }
-                    finally
-                    {
-                        semaphore.Release();
-                    }
-                });
+                    });
 
 
-                await Task.WhenAll(tasks);
+                    await Task.WhenAll(tasks);
 
-                Console.WriteLine($"[PlantID] {plantsWithoutImages} plants did not have images.");
-                Console.WriteLine($"[PlantID] Caching {metadataList.Count()} records for {searchTerm}.");
-                await _cacheService.SetAsync(metadataKey, metadataList, TimeSpan.FromHours(1));
+                    Console.WriteLine($"[PlantID] {plantsWithoutImages} plants did not have images.");
+                    Console.WriteLine($"[PlantID] Caching {metadataList.Count()} records for {searchTerm}.");
+                    await _cacheService.SetAsync(metadataKey, metadataList, TimeSpan.FromHours(1));
+                }
+                else
+                {
+                    Console.WriteLine($"[PlantID] no results found for {searchTerm}.");
+                }
+
+                return new PaginatedResult<PlantIDSearchResultDTO>
+                {
+                    Items = results.ToList(),
+                    CurrentPage = paginatedResult.CurrentPage,
+                    PageSize = paginatedResult.PageSize,
+                    TotalItems = paginatedResult.TotalItems,
+                    TotalPages = paginatedResult.TotalPages
+                };
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"[PlantID] no results found for {searchTerm}.");
+                throw new Exception($"Error encountered while searching: Error: {ex.Message}");
             }
-            return results;
         }
 
     }

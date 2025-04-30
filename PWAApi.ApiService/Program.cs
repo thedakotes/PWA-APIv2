@@ -158,8 +158,8 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 
     // Run seeders after migrations
-    var seedManager = scope.ServiceProvider.GetRequiredService<SeedManagerService>();
-    await seedManager.RunAllAsync(db);
+    //var seedManager = scope.ServiceProvider.GetRequiredService<SeedManagerService>();
+    //await seedManager.RunAllAsync(db);
 }
 
 // Configure the HTTP request pipeline.

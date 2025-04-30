@@ -1,11 +1,9 @@
-﻿using PWAApi.ApiService.DataTransferObjects.PlantID;
-
-namespace PWAApi.ApiService.DataTransferObjects
+﻿namespace PWAApi.ApiService.DataTransferObjects.PlantID
 {
     public class PlantIDSearchResultDTO
     {
         public string ScientificName { get; set; } = string.Empty;
-        public string? CommonName { get; set; }
+        public List<string> CommonNames { get; set; } = new List<string>();
         public List<ImageDTO>? Images { get; set; }
 
     }
