@@ -1,6 +1,7 @@
 using API.DataTransferObjects;
 using API.Models;
 using AutoMapper;
+using PWAApi.ApiService.Authentication.Models;
 using PWAApi.ApiService.DataTransferObjects.PlantID;
 using PWAApi.ApiService.Models.PlantID.PlantNet;
 
@@ -23,6 +24,15 @@ public class MappingProfile: Profile
             .ForMember(dest => dest.Url, opt => opt.MapFrom(src => src.Url != null ? (src.Url.O ?? ( src.Url.M ?? src.Url.S)) : string.Empty));
         CreateMap<TaxonomicRank, TaxonomicRankDTO>();
         CreateMap<IUCN, IUCNDTO>();
+        //#endregion
+
+        //#region User
+        CreateMap<ApplicationUser, UserDTO>();
+        CreateMap<UserDTO, ApplicationUser>();
+        CreateMap<GoogleUserDTO, ApplicationUser>()
+            .ForMember(dest => dest.ProviderId, opt => opt.MapFrom(src => src.sub))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.email))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.name));
         //#endregion
     }
 }

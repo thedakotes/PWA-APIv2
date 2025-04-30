@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using API.Models;
 using PWAApi.ApiService.Models.Taxonomy;
+using PWAApi.ApiService.Authentication.Models;
 
 namespace EventApi.Data
 {
@@ -12,6 +13,7 @@ namespace EventApi.Data
 
         public DbSet<Event> Events { get; set; } = null!;
         public DbSet<Taxonomy> Taxonomy { get; set; } = null!;
+        public DbSet<ApplicationUser> Users { get; set; } = null;
         public DbSet<VernacularName> VernacularNames { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
