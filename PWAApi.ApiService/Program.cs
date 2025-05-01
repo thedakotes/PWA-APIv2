@@ -1,8 +1,13 @@
+using System.Text;
 using API.Services.PlantID;
 using AutoMapper;
 using EventApi.Data;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using PWAApi.ApiService.Authentication;
 using PWAApi.ApiService.Helpers.Seeders;
 using PWAApi.ApiService.Repositories;
 using PWAApi.ApiService.Services;
@@ -55,6 +60,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IAIService, OpenAIService>();
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
+builder.Services.AddScoped<AuthService>();
 
 // Seeders
 builder.Services.AddScoped<ISeeder, TaxonomySeeder>();
@@ -68,6 +74,7 @@ builder.Services.AddScoped<WikimediaService>();
 #region Repositories
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<TaxonomyRepository>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 #endregion
 
 // Set API providers from configuration
@@ -122,6 +129,25 @@ builder.Services.Configure<FormOptions>(options =>
     options.MultipartBodyLengthLimit = 50_000_000; // 50 MB
 });
 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme; // Default API scheme
+})
+.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+});
+
+
 var app = builder.Build();
 
 // Run all migrations/ISeeders on startup to populate tables with current data
@@ -161,6 +187,8 @@ if (app.Environment.IsDevelopment())
 app.UseCors(MyAllowSpecificOrigins);
 
 // Enable authorization (if applicable)
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 // Map controllers (API endpoints)

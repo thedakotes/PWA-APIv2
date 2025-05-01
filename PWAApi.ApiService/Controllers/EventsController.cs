@@ -1,8 +1,10 @@
 using API.DataTransferObjects;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventApi.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class EventsController : ControllerBase
