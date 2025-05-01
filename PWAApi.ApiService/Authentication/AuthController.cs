@@ -45,4 +45,28 @@ public class AuthController : ControllerBase
         var jwt = _authService.GenerateJwtToken(user);
         return Ok(new { jwt });
     }
+
+    [AllowAnonymous]
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] UserDTO userDTO)
+    {
+        if (userDTO == null)
+        {
+            return BadRequest("Invalid user");
+        }
+
+        if (string.IsNullOrEmpty(userDTO.Email))
+        {
+            return BadRequest("Login credentials invalid");
+        }
+
+        var user = await _authService.GetUserByEmail(userDTO.Email);
+        if (user == null)
+        {
+            return Unauthorized("User not found");
+        }
+
+        var jwt = _authService.GenerateJwtToken(user);
+        return Ok(new { jwt });
+    }
 }

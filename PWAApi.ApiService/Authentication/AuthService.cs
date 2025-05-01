@@ -41,7 +41,6 @@ namespace PWAApi.ApiService.Authentication
         {
             var entity = await _authRepo.GetUserByEmail(email);
             return entity != null ? _mapper.Map<UserDTO>(entity) : null;
-
         }
 
         public string GenerateJwtToken(UserDTO user)
@@ -52,7 +51,6 @@ namespace PWAApi.ApiService.Authentication
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Name, user.Name)
             };
-
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
 
