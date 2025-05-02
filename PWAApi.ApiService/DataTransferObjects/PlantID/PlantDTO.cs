@@ -21,13 +21,16 @@ namespace PWAApi.ApiService.DataTransferObjects.PlantID
 
         public string Description { get; set; } = string.Empty;
 
+        [AIDescription("Biome the plant is most likely to be found in")]
+        public string Biome { get; set; } = string.Empty;
+
         public string Cycle { get; set; } = string.Empty;
 
         public string Layer { get; set; } = string.Empty;
 
         public string SoilType { get; set; } = string.Empty;
 
-        [AIDescription("Preferred time of day for watering.")]
+        [AIDescription("Preferred time of day for watering")]
         public WateringPeriod[] WateringPeriods { get; set;} = Array.Empty<WateringPeriod>();
 
         [AIDescription("The level of care required for the plant")]
@@ -37,6 +40,7 @@ namespace PWAApi.ApiService.DataTransferObjects.PlantID
 
         public RequirementLevel WaterRequirement { get; set; } = RequirementLevel.VeryLow;
 
+        [AIDescription("Anatomical parts of the plant such as: petal, stem, leaf, bud, seed, etc.")]
         public List<AnatomicalPart> Anatomy { get; set; } = new List<AnatomicalPart>();
 
         public EdibilityDTO Edibility { get; set; } = new EdibilityDTO(true, string.Empty);
@@ -49,9 +53,13 @@ namespace PWAApi.ApiService.DataTransferObjects.PlantID
 
         public LightDurationDTO LightDuration { get; set; }
 
+        [AIDescription("Characteristics of the plant's seeds")]
+        public SeedDTO Seed { get; set; } = new SeedDTO(string.Empty, string.Empty, 0, string.Empty, 0, string.Empty, string.Empty, string.Empty, string.Empty);
+
         public ToxicityDTO Toxicity { get; set; } = new ToxicityDTO(true, string.Empty, string.Empty);
 
-        public WaterFrequencyDTO WaterFrequency { get; set; }
+        [AIDescription("The amount of water the plant requires on average for each month in milliliters")]
+        public WaterConsumptionDTO[] WaterConsumptions { get; set; } = new WaterConsumptionDTO[12];
 
         public DimensionDTO Width { get; set; }
     }
@@ -71,6 +79,23 @@ namespace PWAApi.ApiService.DataTransferObjects.PlantID
         Medium = 2,
         High = 3,
         VeryHigh = 5
+    }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum Month 
+    {
+        January = 1,
+        February = 2,
+        March = 3,
+        April = 4,
+        May = 5,
+        June = 6,
+        July = 7,
+        August = 8,
+        September = 9,
+        October = 10,
+        November = 11,
+        December = 12
     }
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -122,17 +147,9 @@ namespace PWAApi.ApiService.DataTransferObjects.PlantID
         }
     }
 
+    public record SeedDTO(string description, string germination, float germinationTemperature, string germinationTime, double weight, string color, string shape, string texture, string type);
+
     public record ToxicityDTO(bool Toxic, string Organisms, string Parts);
 
-    public struct WaterFrequencyDTO
-    {
-        public int Value { get; set; }
-        public string Unit { get; set; }
-
-        public WaterFrequencyDTO(int value, string unit) 
-        {
-            Value = value;
-            Unit = unit;
-        }
-    }
+    public record WaterConsumptionDTO(int value, string unit, Month month);
 }

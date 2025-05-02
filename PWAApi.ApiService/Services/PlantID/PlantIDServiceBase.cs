@@ -76,7 +76,7 @@ namespace PWAApi.ApiService.Services.PlantID
                              //This extra part will cause problems if we want to change the caching strategy to also include plants that have no
                              //images, because every time we pull from the cache, we'll also do this call for all our missing images. 
                              //I have this here in case something went bananas, but it's possible we can remove this call entirely
-                             ?? await _wikimediaService.GetImageFromWikimediaAsync(meta.ScientificName);
+                             ?? await _wikimediaService.GetImagesFromWikimediaAsync(meta.ScientificName);
 
                 if (images != null)
                 {
@@ -120,7 +120,7 @@ namespace PWAApi.ApiService.Services.PlantID
                         await semaphore.WaitAsync();
                         try
                         {
-                            var images = await _wikimediaService.GetImageFromWikimediaAsync(item.ScientificName);
+                            var images = await _wikimediaService.GetImagesFromWikimediaAsync(item.ScientificName);
                             if (images != null && images.Any())
                             {
                                 var commonNames = item.VernacularNames.Select(x => x.Name).ToList();
