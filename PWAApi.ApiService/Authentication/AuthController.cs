@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using PWAApi.ApiService.Authentication;
-using PWAApi.ApiService.Authentication.Models;
+using PWAApi.ApiService.Authentication.DataTransferObjects;
 using System.Text.Json;
 
 
@@ -9,64 +10,56 @@ using System.Text.Json;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly IConfiguration _config;
     private AuthService _authService;
 
-    public AuthController(IConfiguration configuration,
-                          AuthService authService)
+    public AuthController(AuthService authService)
     {
-        _config = configuration;
         _authService = authService;
+    }
+
+    [AllowAnonymous]
+    [HttpPost("register")]
+    public async Task<IActionResult> Register(RegisterDTO registerDTO)
+    {
+        var result = await _authService.RegisterUser(registerDTO);
+
+        return Ok(result);
+    }
+
+    [AllowAnonymous]
+    [HttpGet("email-available")]
+    public async Task<IActionResult> EmailAvailable(string email)
+    {
+        var result = await _authService.EmailAvailable(email);
+
+        //True if the Email is available. Otherwise it's false
+        return Ok(result);
     }
 
     [AllowAnonymous]
     [HttpPost("exchange-google-token")]
     public async Task<IActionResult> ExchangeGoogleToken([FromBody] ExchangeTokenRequest request)
     {
-        using var httpClient = new HttpClient();
-        var googleURI = _config["Google:URL"] ?? throw new Exception("Oauth2 URL is missing!");
-        var googleResponse = await httpClient.GetAsync($"{googleURI}/tokeninfo?id_token={request.IdToken}");
-
-        if (!googleResponse.IsSuccessStatusCode)
-            return BadRequest("Invalid Google ID Token.");
-
-        var payload = JsonSerializer.Deserialize<GoogleUserDTO>(await googleResponse.Content.ReadAsStringAsync());
-
-        if (payload == null || string.IsNullOrEmpty(payload.email))
-            return BadRequest("Failed to validate Google token.");
-
-        // Create or find user
-        var user = await _authService.GetUserByEmail(payload.email);
-        if (user == null)
+        if(request.IdToken == null || string.IsNullOrWhiteSpace(request.IdToken))
         {
-            user = await _authService.AddUser(payload);
+            return BadRequest("Google credential missing from request");
         }
 
-        var jwt = _authService.GenerateJwtToken(user);
+        var jwt = await _authService.GoogleLogin(request.IdToken);
         return Ok(new { jwt });
     }
 
     [AllowAnonymous]
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] UserDTO userDTO)
+    public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO)
     {
-        if (userDTO == null)
+        if (loginDTO == null)
         {
             return BadRequest("Invalid user");
         }
 
-        if (string.IsNullOrEmpty(userDTO.Email))
-        {
-            return BadRequest("Login credentials invalid");
-        }
-
-        var user = await _authService.GetUserByEmail(userDTO.Email);
-        if (user == null)
-        {
-            return Unauthorized("User not found");
-        }
-
-        var jwt = _authService.GenerateJwtToken(user);
+        var jwt = await _authService.LoginAsync(loginDTO);
+        
         return Ok(new { jwt });
     }
 }

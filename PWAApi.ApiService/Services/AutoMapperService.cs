@@ -1,6 +1,7 @@
 using API.DataTransferObjects;
 using API.Models;
 using AutoMapper;
+using PWAApi.ApiService.Authentication.DataTransferObjects;
 using PWAApi.ApiService.Authentication.Models;
 using PWAApi.ApiService.DataTransferObjects.PlantID;
 using PWAApi.ApiService.Models.PlantID.PlantNet;
@@ -27,8 +28,8 @@ public class MappingProfile: Profile
         //#endregion
 
         //#region User
-        CreateMap<ApplicationUser, UserDTO>();
-        CreateMap<UserDTO, ApplicationUser>();
+        //CreateMap<ApplicationUser, UserDTO>();
+       // CreateMap<UserDTO, ApplicationUser>();
         CreateMap<GoogleUserDTO, ApplicationUser>()
             .ForMember(dest => dest.ProviderId, opt => opt.MapFrom(src => src.sub))
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.email))

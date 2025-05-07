@@ -1,14 +1,19 @@
-using System.Text;
+﻿using System.Text;
 using API.Services.PlantID;
 using AutoMapper;
 using EventApi.Data;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using PWAApi.ApiService.Authentication;
+using PWAApi.ApiService.Authentication.Data;
+using PWAApi.ApiService.Authentication.Models;
 using PWAApi.ApiService.Helpers.Seeders;
+using PWAApi.ApiService.Middleware;
 using PWAApi.ApiService.Repositories;
 using PWAApi.ApiService.Services;
 using PWAApi.ApiService.Services.AI;
@@ -37,6 +42,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         .UseLazyLoadingProxies()
         .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddDbContext<AuthDbContext>(options =>
+    options
+        .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
@@ -57,10 +66,11 @@ builder.Services.AddScoped<ICacheService, RedisCacheService>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 #region Services
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IAIService, OpenAIService>();
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
-builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<TokenService>();
 
 // Seeders
 builder.Services.AddScoped<ISeeder, TaxonomySeeder>();
@@ -74,7 +84,6 @@ builder.Services.AddScoped<WikimediaService>();
 #region Repositories
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<TaxonomyRepository>();
-builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 #endregion
 
 // Set API providers from configuration
@@ -132,6 +141,8 @@ builder.Services.Configure<FormOptions>(options =>
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme; // Default API scheme
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 {
@@ -145,8 +156,28 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     };
+    /*
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine("JWT validation FAILED:");
+            Console.WriteLine(context.Exception.Message);
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            Console.WriteLine("JWT validated successfully.");
+            return Task.CompletedTask;
+        }
+    };
+    */
 });
 
+builder.Services.AddIdentityCore<ApplicationUser>()
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<AuthDbContext>()
+    .AddDefaultTokenProviders();
 
 var app = builder.Build();
 
@@ -154,8 +185,12 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     // Run migrations
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    var appDb = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    appDb.Database.Migrate();
+
+    // Run migrations
+    var authDb = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+    authDb.Database.Migrate();
 
     // Run seeders after migrations
     //var seedManager = scope.ServiceProvider.GetRequiredService<SeedManagerService>();
@@ -163,7 +198,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
-app.UseExceptionHandler();
+//app.UseExceptionHandler();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Enable Swagger
 app.UseSwagger();
@@ -189,6 +225,18 @@ app.UseCors(MyAllowSpecificOrigins);
 // Enable authorization (if applicable)
 
 app.UseAuthentication();
+
+/*
+app.Use(async (context, next) =>
+{
+    Console.WriteLine("➡️ Incoming request to: " + context.Request.Path);
+    Console.WriteLine("🔐 Authorization header: " + context.Request.Headers["Authorization"]);
+    Console.WriteLine("👤 IsAuthenticated: " + context.User.Identity?.IsAuthenticated);
+    Console.WriteLine("👤 Auth type: " + context.User.Identity?.AuthenticationType);
+    await next();
+});
+*/
+
 app.UseAuthorization();
 
 // Map controllers (API endpoints)
@@ -197,6 +245,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Enable deployment debugging
-app.UseDeveloperExceptionPage();
+//Disable this when we're doing custom exception handling
+//app.UseDeveloperExceptionPage();
 
 app.Run();

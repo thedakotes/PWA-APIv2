@@ -13,7 +13,6 @@ namespace EventApi.Data
 
         public DbSet<Event> Events { get; set; } = null!;
         public DbSet<Taxonomy> Taxonomy { get; set; } = null!;
-        public DbSet<ApplicationUser> Users { get; set; } = null;
         public DbSet<VernacularName> VernacularNames { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
