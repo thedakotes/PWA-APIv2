@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using PWAApi.ApiService.Authentication;
 using PWAApi.ApiService.Authentication.DataTransferObjects;
+using PWAApi.ApiService.Authentication.Services;
 using System.Text.Json;
 
 

@@ -8,7 +8,7 @@ using System.Text.Json;
 using CsvHelper.Configuration;
 using PWAApi.ApiService.Authentication.DataTransferObjects;
 
-namespace PWAApi.ApiService.Authentication
+namespace PWAApi.ApiService.Authentication.Services
 {
     public class AuthService
     {

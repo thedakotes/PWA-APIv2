@@ -7,7 +7,7 @@ using API.Models;
 using AutoMapper;
 using PWAApi.ApiService.Middleware;
 
-namespace PWAApi.ApiService.Authentication
+namespace PWAApi.ApiService.Authentication.Services
 {
     public class TokenService
     {
