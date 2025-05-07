@@ -1,6 +1,5 @@
-﻿namespace PWAApi.ApiService.Authentication.Models
+﻿namespace PWAApi.ApiService.Authentication.DataTransferObjects
 {
-    //I think these property names are very specific to Google?
     public class GoogleUserDTO
     {
         public string sub { get; set; } // Google's unique user ID
