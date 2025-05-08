@@ -6,29 +6,39 @@ using PWAApi.ApiService.Authentication.Models;
 using API.Models;
 using AutoMapper;
 using PWAApi.ApiService.Middleware;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 
 namespace PWAApi.ApiService.Authentication.Services
 {
     public class TokenService
     {
         private readonly IConfiguration _config;
-        private IMapper _mapper;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public TokenService(IConfiguration config, 
-            IMapper mapper)
+            UserManager<ApplicationUser> userManager)
         {
             _config = config;
-            _mapper = mapper;
+            _userManager = userManager;
         }
 
-        public string GenerateJwtToken(ApplicationUser user)
+        public async Task<string> GenerateJwtToken(ApplicationUser user)
         {
+
+            var roles = await _userManager.GetRolesAsync(user);
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Name, user.Name)
             };
+
+            foreach(var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
 

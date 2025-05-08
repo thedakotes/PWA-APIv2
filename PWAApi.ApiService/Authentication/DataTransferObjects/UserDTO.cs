@@ -8,6 +8,11 @@ namespace PWAApi.ApiService.Authentication.DataTransferObjects
         public string Password { get; set; } = string.Empty;
     }
 
+    public class AdminUserDTO: LoginDTO
+    {
+        public string Name { get; set; } = string.Empty;
+    }
+
     public class RegisterDTO : LoginDTO
     {
         public string ConfirmPassword { get; set; } = string.Empty;

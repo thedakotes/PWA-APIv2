@@ -28,7 +28,7 @@ namespace PWAApi.ApiService.Authentication.Services
             _tokenService = tokenService;
         }
 
-        public async Task<string> GoogleLogin(string token)
+        public async Task<string> GoogleLoginAsync(string token)
         {
             var googleURI = _config["Google:URL"] ?? throw new ConfigurationException("Google Oauth2 URL is missing!");
             var googleResponse = await _httpClient.GetAsync($"{googleURI}/tokeninfo?id_token={token}");
@@ -73,15 +73,15 @@ namespace PWAApi.ApiService.Authentication.Services
                 }
             }
 
-            return _tokenService.GenerateJwtToken(user);
+            return await _tokenService.GenerateJwtToken(user);
         }
 
-        public async Task<bool> RegisterUser(RegisterDTO registerDTO)
+        public async Task<bool> RegisterUserAsync(RegisterDTO registerDTO)
         {
             if (registerDTO.Password != registerDTO.ConfirmPassword)
                 throw new ValidationException("Passwords do not match");
 
-            if( !await EmailAvailable(registerDTO.Email) )
+            if( !await EmailAvailableAsync(registerDTO.Email) )
                 throw new ValidationException("Email is already taken");
 
             ApplicationUser user = new ApplicationUser()
@@ -104,7 +104,7 @@ namespace PWAApi.ApiService.Authentication.Services
             return true;
         }
 
-        public async Task<bool> EmailAvailable(string email)
+        public async Task<bool> EmailAvailableAsync(string email)
         {
             if(string.IsNullOrWhiteSpace(email))
                 throw new ValidationException("Email is empty");
@@ -145,7 +145,7 @@ namespace PWAApi.ApiService.Authentication.Services
                 throw new ValidationException("Login information does not match our records.");
 
             
-            return _tokenService.GenerateJwtToken(appUser);
+            return await _tokenService.GenerateJwtToken(appUser);
         }
 
     }

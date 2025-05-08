@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using PWAApi.ApiService.Authentication.Data;
 using PWAApi.ApiService.Authentication.Models;
 using PWAApi.ApiService.Authentication.Services;
+using PWAApi.ApiService.Authentication.Utility;
 using PWAApi.ApiService.Helpers.Seeders;
 using PWAApi.ApiService.Middleware;
 using PWAApi.ApiService.Repositories;
@@ -71,6 +72,7 @@ builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IAIService, OpenAIService>();
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<AdminUserSeeder>();
 
 // Seeders
 builder.Services.AddScoped<ISeeder, TaxonomySeeder>();
@@ -195,6 +197,18 @@ using (var scope = app.Services.CreateScope())
     // Run seeders after migrations
     //var seedManager = scope.ServiceProvider.GetRequiredService<SeedManagerService>();
     //await seedManager.RunAllAsync(db);
+
+    try
+    {
+        //We may want to turn this off after the initial run? Up to you.
+        var adminSeeder = scope.ServiceProvider.GetRequiredService<AdminUserSeeder>();
+        await adminSeeder.SeedAdminUserAsync();
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the admin user.");
+    }
 }
 
 // Configure the HTTP request pipeline.

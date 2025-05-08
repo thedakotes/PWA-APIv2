@@ -26,14 +26,5 @@ public class MappingProfile: Profile
         CreateMap<TaxonomicRank, TaxonomicRankDTO>();
         CreateMap<IUCN, IUCNDTO>();
         //#endregion
-
-        //#region User
-        //CreateMap<ApplicationUser, UserDTO>();
-       // CreateMap<UserDTO, ApplicationUser>();
-        CreateMap<GoogleUserDTO, ApplicationUser>()
-            .ForMember(dest => dest.ProviderId, opt => opt.MapFrom(src => src.sub))
-            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.email))
-            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.name));
-        //#endregion
     }
 }

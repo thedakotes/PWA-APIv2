@@ -21,7 +21,7 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterDTO registerDTO)
     {
-        var result = await _authService.RegisterUser(registerDTO);
+        var result = await _authService.RegisterUserAsync(registerDTO);
 
         return Ok(result);
     }
@@ -30,7 +30,7 @@ public class AuthController : ControllerBase
     [HttpGet("email-available")]
     public async Task<IActionResult> EmailAvailable(string email)
     {
-        var result = await _authService.EmailAvailable(email);
+        var result = await _authService.EmailAvailableAsync(email);
 
         //True if the Email is available. Otherwise it's false
         return Ok(result);
@@ -45,7 +45,7 @@ public class AuthController : ControllerBase
             return BadRequest("Google credential missing from request");
         }
 
-        var jwt = await _authService.GoogleLogin(request.IdToken);
+        var jwt = await _authService.GoogleLoginAsync(request.IdToken);
         return Ok(new { jwt });
     }
 
