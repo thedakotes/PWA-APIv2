@@ -51,10 +51,8 @@ namespace PWAApi.ApiService.DataTransferObjects.PlantID
 
         public IEnumerable<ImageDTO> Images { get; set; } = new List<ImageDTO>();
 
-        public LightDurationDTO LightDuration { get; set; }
-
-        [AIDescription("Characteristics of the plant's seeds")]
-        public SeedDTO Seed { get; set; } = new SeedDTO(string.Empty, string.Empty, 0, string.Empty, 0, string.Empty, string.Empty, string.Empty, string.Empty);
+        [AIDescription("The daily maximum and minimum hours of light the plant requires on average for each month")]
+        public LightDurationDTO[] LightDurations { get; set; } = new LightDurationDTO[12];
 
         public ToxicityDTO Toxicity { get; set; } = new ToxicityDTO(true, string.Empty, string.Empty);
 
@@ -133,23 +131,11 @@ namespace PWAApi.ApiService.DataTransferObjects.PlantID
 
     public record ImageDTO(string? URL, string? License, string? LicenseUrl ,string? Attribution);
 
-    public struct LightDurationDTO
-    {
-        public double Max { get; set; }
-        public double Min { get; set; }
-        public string Unit { get; set; }
+    public record LightDurationDTO(double Max, double Min, Month month);
 
-        public LightDurationDTO(double min, double max, string unit)
-        {
-            Max = max;
-            Min = min;
-            Unit = unit;
-        }
-    }
-
-    public record SeedDTO(string description, string germination, float germinationTemperature, string germinationTime, double weight, string color, string shape, string texture, string type);
+    public record SeedDTO(string Description, string Germination, float GerminationTemperature, string GerminationTime, double Weight, string Color, string Shape, string Texture, string Type);
 
     public record ToxicityDTO(bool Toxic, string Organisms, string Parts);
 
-    public record WaterConsumptionDTO(int value, string unit, Month month);
+    public record WaterConsumptionDTO(int Value, Month Month);
 }

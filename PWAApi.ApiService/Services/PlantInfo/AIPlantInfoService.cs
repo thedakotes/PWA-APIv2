@@ -67,6 +67,7 @@ namespace PWAApi.ApiService.Services.PlantInfo
                 $"Give us information for the plant species: '{species}'. ",
                 "Provide a consistent and factual description of the plant species.",
                 "Avoid creative variations. Always use the same description for the same plant.",
+                "Include information about the plant's daily average maximum and minimum hours of light for every month of the year. If the plant does not require light for that month then return 0 for the value.",
                 "Include information about the plant's watering needs for every month of the year in milliliters. If the plant does not require water for that month then return 0 for the value.",
                 "Include information about edibility and toxicity for humans, dogs, and cats broken down by part of plant.",
             });
