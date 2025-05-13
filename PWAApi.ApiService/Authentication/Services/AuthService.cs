@@ -1,12 +1,9 @@
-﻿using PWAApi.ApiService.Authentication.Models;
-using AutoMapper;
-using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
-using Azure.Core;
-using System.Net.Http;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using CsvHelper.Configuration;
+using Microsoft.AspNetCore.Identity;
 using PWAApi.ApiService.Authentication.DataTransferObjects;
+using PWAApi.ApiService.Authentication.Models;
 
 namespace PWAApi.ApiService.Authentication.Services
 {
@@ -30,78 +27,92 @@ namespace PWAApi.ApiService.Authentication.Services
 
         public async Task<string> GoogleLoginAsync(string token)
         {
-            var googleURI = _config["Google:URL"] ?? throw new ConfigurationException("Google Oauth2 URL is missing!");
-            var googleResponse = await _httpClient.GetAsync($"{googleURI}/tokeninfo?id_token={token}");
-
-            if (!googleResponse.IsSuccessStatusCode)
-                throw new ApplicationException("Failed to log in with Google.");
-
-            var payload = JsonSerializer.Deserialize<GoogleUserDTO>(await googleResponse.Content.ReadAsStringAsync());
-
-            if (payload == null || string.IsNullOrEmpty(payload.email))
-                throw new ApplicationException("Failed to process response from Google.");
-
-            // Create or find user
-            var user = await _userManager.FindByEmailAsync(payload.email);
-            if (user == null)
+            try
             {
-                user = new ApplicationUser
-                {
-                    UserName = payload.email,
-                    Email = payload.email,
-                    Name = payload.name,
-                    ProviderId = payload.sub,
-                    Provider = "Google",
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now,
-                    EmailConfirmed = true
-                };
+                var googleURI = _config["Google:URL"] ?? throw new ConfigurationException("Google Oauth2 URL is missing!");
+                var googleResponse = await _httpClient.GetAsync($"{googleURI}/tokeninfo?id_token={token}");
 
-                var result = await _userManager.CreateAsync(user);
-                if (!result.Succeeded)
+                if (!googleResponse.IsSuccessStatusCode)
+                    throw new ApplicationException("Failed to log in with Google.");
+
+                var payload = JsonSerializer.Deserialize<GoogleUserDTO>(await googleResponse.Content.ReadAsStringAsync());
+
+                if (payload == null || string.IsNullOrEmpty(payload.email))
+                    throw new ApplicationException("Failed to process response from Google.");
+
+                // Create or find user
+                var user = await _userManager.FindByEmailAsync(payload.email);
+                if (user == null)
                 {
-                    throw new ApplicationException(string.Join(", ", result.Errors.Select(p => p.Description)));
+                    user = new ApplicationUser
+                    {
+                        UserName = payload.email,
+                        Email = payload.email,
+                        Name = payload.name,
+                        ProviderId = payload.sub,
+                        Provider = "Google",
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now,
+                        EmailConfirmed = true
+                    };
+
+                    var result = await _userManager.CreateAsync(user);
+                    if (!result.Succeeded)
+                    {
+                        throw new ApplicationException(string.Join(", ", result.Errors.Select(p => p.Description)));
+                    }
                 }
+                else
+                {
+                    //We found a user. Make sure it was a user that was previously logged in with Google auth, and not an Adjutum user with a gmail email
+                    if (user.Provider != "Google" || string.IsNullOrWhiteSpace(user.ProviderId))
+                    {
+                        //Not sure what we want to say here without giving away too much information?
+                        throw new ApplicationException("A user with this email already exists in our system.");
+                    }
+                }
+
+                return await _tokenService.GenerateJwtToken(user);
             }
-            else
+            catch (Exception ex)
             {
-                //We found a user. Make sure it was a user that was previously logged in with Google auth, and not an Adjutum user with a gmail email
-                if (user.Provider != "Google" || string.IsNullOrWhiteSpace(user.ProviderId))
-                {
-                    //Not sure what we want to say here without giving away too much information?
-                    throw new ApplicationException("A user with this email already exists in our system.");
-                }
+                throw new Exception($"Google login failed. Error: {ex.Message}");
             }
-
-            return await _tokenService.GenerateJwtToken(user);
         }
 
         public async Task<bool> RegisterUserAsync(RegisterDTO registerDTO)
         {
-            if (registerDTO.Password != registerDTO.ConfirmPassword)
-                throw new ValidationException("Passwords do not match");
-
-            if( !await EmailAvailableAsync(registerDTO.Email) )
-                throw new ValidationException("Email is already taken");
-
-            ApplicationUser user = new ApplicationUser()
+            try
             {
-                Email = registerDTO.Email,
-                UserName = registerDTO.Email,
-                EmailConfirmed = false,
-                Name = registerDTO.Name,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
-            };
+                if (registerDTO.Password != registerDTO.ConfirmPassword)
+                    throw new ValidationException("Passwords do not match");
 
-            var result = await _userManager.CreateAsync(user, registerDTO.Password);
+                if (!await EmailAvailableAsync(registerDTO.Email))
+                    throw new ValidationException("Email is already taken");
 
-            if (!result.Succeeded)
-                throw new ApplicationException(string.Join(", ", result.Errors.Select(p => p.Description)));
+                ApplicationUser user = new ApplicationUser()
+                {
+                    Email = registerDTO.Email,
+                    UserName = registerDTO.Email,
+                    EmailConfirmed = false,
+                    Name = registerDTO.Name,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
 
-            //TODO: We'd need to consider sending an email to the user to make them confirm their account creation before we make it active.
+                var result = await _userManager.CreateAsync(user, registerDTO.Password);
 
-            return true;
+                if (!result.Succeeded)
+                    throw new ApplicationException(string.Join(", ", result.Errors.Select(p => p.Description)));
+
+                //TODO: We'd need to consider sending an email to the user to make them confirm their account creation before we make it active.
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error registering user. Error: {ex.Message}");
+            }
         }
 
         public async Task<bool> EmailAvailableAsync(string email)
@@ -120,32 +131,39 @@ namespace PWAApi.ApiService.Authentication.Services
 
         public async Task<string> LoginAsync(LoginDTO loginDTO)
         {
-            if (string.IsNullOrWhiteSpace(loginDTO.Email) || string.IsNullOrWhiteSpace(loginDTO.Password))
-                throw new ValidationException("Email or password is missing");
+            try
+            {
+                if (string.IsNullOrWhiteSpace(loginDTO.Email) || string.IsNullOrWhiteSpace(loginDTO.Password))
+                    throw new ValidationException("Email or password is missing");
 
-            var appUser = await _userManager.FindByEmailAsync(loginDTO.Email);
+                var appUser = await _userManager.FindByEmailAsync(loginDTO.Email);
 
-            if (appUser == null)
-                throw new ValidationException("Login information does not match our records.");
+                if (appUser == null)
+                    throw new ValidationException("Login information does not match our records.");
 
-            //If ProviderId is not null, this user was created via Google login authentication. These users cannot log in via our normal
-            //login screen, they must use the Google auth route.
-            if (appUser.ProviderId != null)
-                throw new ValidationException("Login information does not match our records.");
+                //If ProviderId is not null, this user was created via Google login authentication. These users cannot log in via our normal
+                //login screen, they must use the Google auth route.
+                if (appUser.ProviderId != null)
+                    throw new ValidationException("Login information does not match our records.");
 
-            //KEF: to revisit. We won't lock them out for now if their email isn't confirmed, but we should
-            //put a mechanism in place to force verification
-            //if (!appUser.EmailConfirmed)
-            //    throw new ValidationException("Email has not yet been confirmed. Please check your email before attempting to log in.");
+                //KEF: to revisit. We won't lock them out for now if their email isn't confirmed, but we should
+                //put a mechanism in place to force verification
+                //if (!appUser.EmailConfirmed)
+                //    throw new ValidationException("Email has not yet been confirmed. Please check your email before attempting to log in.");
 
-            var isValid = await _userManager.CheckPasswordAsync(appUser, loginDTO.Password);
+                var isValid = await _userManager.CheckPasswordAsync(appUser, loginDTO.Password);
 
-            if (!isValid)
-                //Using the same generic error as above. Don't want to give away too much information on what is/isn't correct about their login
-                throw new ValidationException("Login information does not match our records.");
+                if (!isValid)
+                    //Using the same generic error as above. Don't want to give away too much information on what is/isn't correct about their login
+                    throw new ValidationException("Login information does not match our records.");
 
-            
-            return await _tokenService.GenerateJwtToken(appUser);
+
+                return await _tokenService.GenerateJwtToken(appUser);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
     }
