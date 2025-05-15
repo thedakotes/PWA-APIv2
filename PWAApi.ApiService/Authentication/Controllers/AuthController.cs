@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PWAApi.ApiService.Authentication.DataTransferObjects;
 using PWAApi.ApiService.Authentication.Services;
-using System.Text.Json;
-
 
 [ApiController]
 [Route("api/[controller]")]
@@ -61,5 +59,26 @@ public class AuthController : ControllerBase
         var jwt = await _authService.LoginAsync(loginDTO);
         
         return Ok(new { jwt });
+    }
+
+    [Authorize]
+    [HttpGet("GetUser")]
+    public async Task<IActionResult> GetUser()
+    {
+        var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userID))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            var user = await _authService.GetUser(userID);
+            return Ok(user);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
     }
 }

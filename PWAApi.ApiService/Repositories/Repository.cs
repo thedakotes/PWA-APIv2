@@ -45,4 +45,16 @@ public class Repository<T> : IRepository<T> where T : class
         });
         await _context.SaveChangesAsync(); // Ensure changes are saved to the database after deletion
     }
+
+    public async Task DeleteAsync(T entity)
+    {
+        await Task.Run(() =>
+        {
+            if (entity != null)
+            {
+                _dbSet.Remove(entity);
+            }
+        });
+        await _context.SaveChangesAsync(); // Ensure changes are saved to the database after deletion
+    }
 }

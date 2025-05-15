@@ -30,6 +30,7 @@ builder.AddServiceDefaults();
 
 // Configure the HTTP request pipeline.
 builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
 
 //Distributed Cache where we can add/remove items to/from the Redis cache
 builder.AddRedisDistributedCache("cache");
@@ -62,7 +63,6 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
-
 // Register AutoMapper (scanning all assemblies for profiles)
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -71,21 +71,26 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IAIService, OpenAIService>();
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
+builder.Services.AddScoped<IReminderService, ReminderService>();
 builder.Services.AddScoped<TokenService>();
-builder.Services.AddScoped<AdminUserSeeder>();
+builder.Services.AddScoped<WateringScheduleService>();
+builder.Services.AddScoped<WikimediaService>();
 
 // Seeders
+builder.Services.AddScoped<AdminUserSeeder>();
 builder.Services.AddScoped<ISeeder, TaxonomySeeder>();
 builder.Services.AddScoped<ISeeder, VernacularNameSeeder>(); 
 builder.Services.AddScoped<SeedManagerService>();
-
-builder.Services.AddScoped<WateringScheduleService>();
-builder.Services.AddScoped<WikimediaService>();
 #endregion
 
 #region Repositories
 builder.Services.AddScoped<IEventRepository, EventRepository>();
+builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
 builder.Services.AddScoped<TaxonomyRepository>();
+#endregion
+
+#region Config
+builder.Services.AddScoped<ICurrentUser, HttpContextCurrentUser>();
 #endregion
 
 // Set API providers from configuration
@@ -237,7 +242,6 @@ if (app.Environment.IsDevelopment())
 app.UseCors(MyAllowSpecificOrigins);
 
 // Enable authorization (if applicable)
-
 app.UseAuthentication();
 
 /*

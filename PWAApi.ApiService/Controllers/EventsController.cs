@@ -17,12 +17,12 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetEvents()
+    public async Task<IActionResult> Get()
     {
         try
         {
             // Retrieve all events from the service
-            var events = await _eventsService.GetAllEventsAsync();
+            var events = await _eventsService.GetByUser();
             return Ok(events); // Return a 200 OK response with the list of events
         }
         catch (Exception ex)
@@ -33,12 +33,12 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetEvent(int id)
+    public async Task<IActionResult> Get(int id)
     {
         try
         {
             // Retrieve all events from the service
-            var eventModel = await _eventsService.GetEventByIdAsync(id);
+            var eventModel = await _eventsService.Get(id);
             return Ok(eventModel); // Return a 200 OK response with the event
         }
         catch (Exception ex)
@@ -49,7 +49,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddEvent([FromBody] EventDTO newEvent)
+    public async Task<IActionResult> Add([FromBody] EventDTO newEvent)
     {
         if (newEvent == null)
         {
@@ -59,7 +59,7 @@ public class EventsController : ControllerBase
         try
         {
             // Add the new event using the service
-            EventDTO entity = await _eventsService.AddEventAsync(newEvent);
+            EventDTO entity = await _eventsService.Add(newEvent);
             return Ok(entity); // Return a 201 Created response
         }
         catch (Exception ex)
@@ -85,13 +85,13 @@ public class EventsController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteEvent(int id)
+    public async Task<IActionResult> Delete(int id)
     {
         try
         {
-            if (await _eventsService.GetEventByIdAsync(id) != null)
+            if (await _eventsService.Get(id) != null)
             {
-                await _eventsService.DeleteEventAsync(id);
+                await _eventsService.Delete(id);
                 return Ok();
             }
             else

@@ -1,12 +1,10 @@
 using API.DataTransferObjects;
+using API.Models;
+using PWAApi.ApiService.Services;
 
-public interface IEventService
+public interface IEventService : IEntityService<Event, EventDTO>
 {
-    Task<EventDTO>AddEventAsync(EventDTO newEvent);
-    Task<IEnumerable<EventDTO>> GetAllEventsAsync();
-    Task<EventDTO?> GetEventByIdAsync(int id);
-    Task DeleteEventAsync(int id);
-    Task UpdateEventAsync(EventDTO updatedEvent);
-
     Task<List<EventDTO>> AICreateEvents(string eventDetails);
+
+    Task<IEnumerable<EventDTO>> GetByUser();
 }

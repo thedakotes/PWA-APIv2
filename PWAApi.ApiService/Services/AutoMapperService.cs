@@ -3,7 +3,9 @@ using API.Models;
 using AutoMapper;
 using PWAApi.ApiService.Authentication.DataTransferObjects;
 using PWAApi.ApiService.Authentication.Models;
+using PWAApi.ApiService.DataTransferObjects;
 using PWAApi.ApiService.DataTransferObjects.PlantID;
+using PWAApi.ApiService.Models;
 using PWAApi.ApiService.Models.PlantID.PlantNet;
 
 public class MappingProfile: Profile
@@ -13,6 +15,8 @@ public class MappingProfile: Profile
         //#region Events
         CreateMap<Event, EventDTO>();
         CreateMap<EventDTO, Event>();
+        CreateMap<Reminder, ReminderDTO>();
+        CreateMap<ReminderDTO, Reminder>();
         //#endregion
 
         //#region PlantID
@@ -25,6 +29,11 @@ public class MappingProfile: Profile
             .ForMember(dest => dest.Url, opt => opt.MapFrom(src => src.Url != null ? (src.Url.O ?? ( src.Url.M ?? src.Url.S)) : string.Empty));
         CreateMap<TaxonomicRank, TaxonomicRankDTO>();
         CreateMap<IUCN, IUCNDTO>();
+        //#endregion
+
+        //#region User
+        CreateMap<ApplicationUser, UserDTO>();
+        CreateMap<UserDTO, ApplicationUser>();
         //#endregion
     }
 }

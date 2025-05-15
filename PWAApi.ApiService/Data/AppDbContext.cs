@@ -1,17 +1,21 @@
-using Microsoft.EntityFrameworkCore;
 using API.Models;
-using PWAApi.ApiService.Models.Taxonomy;
+using Microsoft.EntityFrameworkCore;
 using PWAApi.ApiService.Authentication.Models;
+using PWAApi.ApiService.Models;
+using PWAApi.ApiService.Models.Taxonomy;
 
 namespace EventApi.Data
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        private readonly ICurrentUser _currentUser;
+        public AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser currentUSer) : base(options)
         {
+            _currentUser = currentUSer;
         }
 
         public DbSet<Event> Events { get; set; } = null!;
+        public DbSet<Reminder> Reminders { get; set; } = null!;
         public DbSet<Taxonomy> Taxonomy { get; set; } = null!;
         public DbSet<VernacularName> VernacularNames { get; set; } = null!;
 
@@ -23,12 +27,14 @@ namespace EventApi.Data
         public override int SaveChanges()
         {
             UpdateTimestamps();
+            UpdateUserIDs();
             return base.SaveChanges();
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             UpdateTimestamps();
+            UpdateUserIDs();
             return await base.SaveChangesAsync(cancellationToken);
         }
 
@@ -45,6 +51,15 @@ namespace EventApi.Data
                 {
                     entry.Entity.UpdatedAt = DateTime.UtcNow; // Update UpdatedAt for modified entities
                 }
+            }
+        }
+
+        private void UpdateUserIDs()
+        {
+            var entries = ChangeTracker.Entries<IUserAssociated>();
+            foreach (var entry in entries)
+            {
+                entry.Entity.UserID = _currentUser.UserID;
             }
         }
     }

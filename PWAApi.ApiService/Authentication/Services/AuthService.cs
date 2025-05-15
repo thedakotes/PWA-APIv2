@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
+using AutoMapper;
 using CsvHelper.Configuration;
 using Microsoft.AspNetCore.Identity;
 using PWAApi.ApiService.Authentication.DataTransferObjects;
@@ -9,20 +10,23 @@ namespace PWAApi.ApiService.Authentication.Services
 {
     public class AuthService
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly TokenService _tokenService;
         private readonly IConfiguration _config;
         private readonly HttpClient _httpClient;
+        private readonly IMapper _mapper;
+        private readonly TokenService _tokenService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public AuthService(IHttpClientFactory httpClientFactory,
             IConfiguration config,
+            IMapper mapper,
             TokenService tokenService,
             UserManager<ApplicationUser> userManager)
         {
             _config = config;
             _httpClient = httpClientFactory.CreateClient();
-            _userManager = userManager;
+            _mapper = mapper;
             _tokenService = tokenService;
+            _userManager = userManager;
         }
 
         public async Task<string> GoogleLoginAsync(string token)
@@ -166,5 +170,16 @@ namespace PWAApi.ApiService.Authentication.Services
             }
         }
 
+        public async Task<UserDTO> GetUser(string userID)
+        {
+            var user = await _userManager.FindByIdAsync(userID);
+            if (user == null)
+            {
+                throw new Exception("User not found.");
+            }
+
+            var dataTransferObject = _mapper.Map<UserDTO>(user);
+            return dataTransferObject;
+        }
     }
 }
