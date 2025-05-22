@@ -5,8 +5,8 @@ using PWAApi.ApiService.Authentication.DataTransferObjects;
 using PWAApi.ApiService.Authentication.Models;
 using PWAApi.ApiService.DataTransferObjects;
 using PWAApi.ApiService.DataTransferObjects.PlantID;
-using PWAApi.ApiService.Models;
 using PWAApi.ApiService.Models.PlantID.PlantNet;
+using PWAApi.ApiService.Models.Reminder;
 
 public class MappingProfile: Profile
 {
@@ -15,8 +15,12 @@ public class MappingProfile: Profile
         //#region Events
         CreateMap<Event, EventDTO>();
         CreateMap<EventDTO, Event>();
-        CreateMap<Reminder, ReminderDTO>();
+        CreateMap<Reminder, ReminderDTO>()
+            .ForMember(dest => dest.NextOccurrence, opt => opt.MapFrom(src => src.GetNextOccurrence(DateTime.Now)));
         CreateMap<ReminderDTO, Reminder>();
+        CreateMap<ReminderTask, ReminderTaskDTO>();
+        CreateMap<ReminderTaskDTO, ReminderTask>();
+        CreateMap<CreateReminderDTO, Reminder>();
         //#endregion
 
         //#region PlantID

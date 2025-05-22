@@ -46,7 +46,7 @@ namespace PWAApi.ApiService.Controllers
         }
 
         [HttpPost("Add")]
-        public async Task<IActionResult> Add([FromBody] ReminderDTO dataTransferObject)
+        public async Task<IActionResult> Add([FromBody] CreateReminderDTO dataTransferObject)
         {
             try
             {
@@ -73,13 +73,13 @@ namespace PWAApi.ApiService.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPut("Update")]
         public async Task<IActionResult> Update([FromBody] ReminderDTO dataTransferObject)
         {
             try
             {
-                await _reminderService.Update(dataTransferObject);
-                return Ok();
+                var updatedReminder = await _reminderService.Update(dataTransferObject);
+                return Ok(updatedReminder);
             }
             catch (Exception ex)
             {

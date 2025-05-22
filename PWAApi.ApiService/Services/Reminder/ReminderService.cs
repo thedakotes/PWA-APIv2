@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
 using PWAApi.ApiService.Authentication.Models;
 using PWAApi.ApiService.DataTransferObjects;
-using PWAApi.ApiService.Models;
+using PWAApi.ApiService.Models.Reminder;
 using PWAApi.ApiService.Repositories;
 
 namespace PWAApi.ApiService.Services
 {
-    public class ReminderService : EntityService<Reminder, ReminderDTO, IReminderRepository>, IReminderService
+    public class ReminderService : EntityService<Reminder, ReminderDTO, CreateReminderDTO, IReminderRepository>, IReminderService
     {
         private readonly ICurrentUser _currentUser;
 
@@ -25,7 +25,12 @@ namespace PWAApi.ApiService.Services
                     throw new Exception($"Reminder not found");
                 }
 
+                foreach (var reminderTask in reminder.Tasks)
+                {
+                    reminderTask.IsCompleted = true;
+                }
                 reminder.IsCompleted = true;
+
                 await _repository.UpdateAsync(reminder);
                 return _mapper.Map<ReminderDTO>(reminder);
             }
@@ -41,7 +46,7 @@ namespace PWAApi.ApiService.Services
             {
                 var models = await _repository.GetByUser(_currentUser.UserID);
                 var modelDTOs = models.Select(x => _mapper.Map<ReminderDTO>(x));
-                return modelDTOs;
+                return modelDTOs.OrderBy(x => x.IsCompleted).ThenByDescending(x => x.PriorityLevel).ThenByDescending(x => x.ID);
             }
             catch (Exception ex)
             {

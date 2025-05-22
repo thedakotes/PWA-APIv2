@@ -7,7 +7,7 @@ using PWAApi.ApiService.Helpers;
 using PWAApi.ApiService.Services;
 using PWAApi.ApiService.Authentication.Models;
 
-public class EventService : EntityService<Event, EventDTO, IEventRepository>, IEventService
+public class EventService : EntityService<Event, EventDTO, EventDTO, IEventRepository>, IEventService
 {
     private readonly IAIService _aiService;
     private readonly ICurrentUser _currentUser;

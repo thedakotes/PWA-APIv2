@@ -1,6 +1,6 @@
 ﻿using EventApi.Data;
 using Microsoft.EntityFrameworkCore;
-using PWAApi.ApiService.Models;
+using PWAApi.ApiService.Models.Reminder;
 
 namespace PWAApi.ApiService.Repositories
 {

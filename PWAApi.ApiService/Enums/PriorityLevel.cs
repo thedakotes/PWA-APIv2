@@ -1,6 +1,6 @@
 ﻿namespace PWAApi.ApiService.Enums
 {
-    public enum PriorityLevelEnum
+    public enum PriorityLevel
     {
         None = 0,
         Low = 1,

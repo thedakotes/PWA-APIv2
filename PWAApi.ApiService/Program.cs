@@ -2,12 +2,10 @@
 using API.Services.PlantID;
 using AutoMapper;
 using EventApi.Data;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using PWAApi.ApiService.Authentication.Data;
 using PWAApi.ApiService.Authentication.Models;

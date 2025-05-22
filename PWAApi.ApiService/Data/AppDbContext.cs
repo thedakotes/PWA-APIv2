@@ -2,6 +2,7 @@ using API.Models;
 using Microsoft.EntityFrameworkCore;
 using PWAApi.ApiService.Authentication.Models;
 using PWAApi.ApiService.Models;
+using PWAApi.ApiService.Models.Reminder;
 using PWAApi.ApiService.Models.Taxonomy;
 
 namespace EventApi.Data
@@ -14,10 +15,15 @@ namespace EventApi.Data
             _currentUser = currentUSer;
         }
 
+        #region DbSet
+
         public DbSet<Event> Events { get; set; } = null!;
         public DbSet<Reminder> Reminders { get; set; } = null!;
+        public DbSet<ReminderTask> ReminderTasks { get; set; } = null!;
         public DbSet<Taxonomy> Taxonomy { get; set; } = null!;
         public DbSet<VernacularName> VernacularNames { get; set; } = null!;
+
+        #endregion
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

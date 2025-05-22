@@ -10,7 +10,7 @@ namespace PWAApi.ApiService.Services
     /// <typeparam name="T">The entity type.</typeparam>
     /// <typeparam name="DTO">The data transfer object type.</typeparam>
     /// <typeparam name="TRepository">The repository type implementing <see cref="IRepository{T}"/>.</typeparam>
-    public abstract class EntityService<T, DTO, TRepository> where T : class
+    public abstract class EntityService<T, DTO, CreateDTO, TRepository> where T : class
         where TRepository : class, IRepository<T>
     {
         public readonly IMapper _mapper;
@@ -55,7 +55,7 @@ namespace PWAApi.ApiService.Services
         /// </summary>
         /// <param name="dataTransferObject">The DTO representing the entity to add.</param>
         /// <returns>The mapped DTO of the newly added entity.</returns>
-        public async Task<DTO> Add(DTO dataTransferObject)
+        public async Task<DTO> Add(CreateDTO dataTransferObject)
         {
             var entity = _mapper.Map<T>(dataTransferObject);
             await _repository.AddAsync(entity);
@@ -67,10 +67,12 @@ namespace PWAApi.ApiService.Services
         /// Updates an existing entity in the repository using the provided DTO.
         /// </summary>
         /// <param name="dataTransferObject">The DTO representing the updated entity.</param>
-        public async Task Update(DTO dataTransferObject)
+        public async Task<DTO> Update(DTO dataTransferObject)
         {
             var entity = _mapper.Map<T>(dataTransferObject);
             await _repository.UpdateAsync(entity);
+            var modelDTO = _mapper.Map<DTO>(entity);
+            return modelDTO;
         }
 
         /// <summary>
