@@ -52,6 +52,7 @@ namespace EventApi.Data
                 if (entry.State == EntityState.Added)
                 {
                     entry.Entity.CreatedAt = DateTime.UtcNow; // Set CreatedAt for new entities
+                    entry.Entity.UpdatedAt = entry.Entity.CreatedAt; //Since we don't allow nulls for UpdatedAt, we'll make it equal to the CreatedAt date
                 }
                 else if (entry.State == EntityState.Modified)
                 {
