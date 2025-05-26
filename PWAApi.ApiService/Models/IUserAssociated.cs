@@ -2,6 +2,6 @@
 {
     public interface IUserAssociated
     {
-        Guid UserID { get; set; }
+        Guid UserId { get; set; }
     }
 }

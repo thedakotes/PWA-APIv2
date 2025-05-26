@@ -14,6 +14,7 @@ using PWAApi.ApiService.Authentication.Utility;
 using PWAApi.ApiService.Helpers.Seeders;
 using PWAApi.ApiService.Middleware;
 using PWAApi.ApiService.Repositories;
+using PWAApi.ApiService.Repositories.Event;
 using PWAApi.ApiService.Services;
 using PWAApi.ApiService.Services.AI;
 using PWAApi.ApiService.Services.Caching;
@@ -66,10 +67,12 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 #region Services
 builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<ICalendarEventService, CalendarEventService>();
 builder.Services.AddScoped<IAIService, OpenAIService>();
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
 builder.Services.AddScoped<IReminderService, ReminderService>();
+builder.Services.AddScoped<IReminderItemService, ReminderItemService>();
+builder.Services.AddScoped<IReminderTaskService, ReminderTaskService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<WateringScheduleService>();
 builder.Services.AddScoped<WikimediaService>();
@@ -82,8 +85,10 @@ builder.Services.AddScoped<SeedManagerService>();
 #endregion
 
 #region Repositories
-builder.Services.AddScoped<IEventRepository, EventRepository>();
+builder.Services.AddScoped<ICalendarEventRepository, EventRepository>();
 builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
+builder.Services.AddScoped<IReminderItemRepository, ReminderItemRepository>();
+builder.Services.AddScoped<IReminderTaskRepository, ReminderTaskRepository>();
 builder.Services.AddScoped<TaxonomyRepository>();
 #endregion
 

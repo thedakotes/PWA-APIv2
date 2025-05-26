@@ -1,25 +1,9 @@
 ﻿using PWAApi.ApiService.Enums;
 
-namespace PWAApi.ApiService.Models.Reminder
+namespace PWAApi.ApiService.Models.Events
 {
-    public class Reminder : ReminderEntity, IUserAssociated
+    public abstract class RecurringEventBase : EventBase
     {
-        /// <summary>
-        /// The associated User's Guid
-        /// </summary>
-        public required Guid UserID { get; set; }
-
-        /// <summary>
-        /// Potential extra information entered by the User
-        /// </summary>
-        public string? Notes { get; set; }
-
-        /// <summary>
-        /// The first "due" date
-        /// If null it is effectively due immediately
-        /// </summary>
-        public DateTimeOffset? StartDate { get; set; }
-
         /// <summary>
         /// Determines if Reminder is recurring.
         /// If true - we'll calculate subsequent occurrences
@@ -49,6 +33,12 @@ namespace PWAApi.ApiService.Models.Reminder
         public int OccurrenceCounter { get; set; } = 0;
 
         /// <summary>
+        /// The first "due" date
+        /// If null it is effectively due immediately
+        /// </summary>
+        public DateTimeOffset? StartDate { get; set; }
+
+        /// <summary>
         /// The date and time to stop repeating (null = forever)
         /// </summary>
         public DateTimeOffset? EndDate { get; set; }
@@ -60,7 +50,7 @@ namespace PWAApi.ApiService.Models.Reminder
         public DateTimeOffset? GetNextOccurrence(DateTimeOffset fromDate)
         {
             // Base for next occurrence
-            var next = StartDate ?? CreatedAt;
+            var next = StartDate ?? CreatedOn;
 
             // If this is a repeat, jump to last generated
             if (OccurrenceCounter > 0)
@@ -82,7 +72,7 @@ namespace PWAApi.ApiService.Models.Reminder
             }
 
             // Fast-forward until we're beyond 'fromDate'
-            while (next <= fromDate) 
+            while (next <= fromDate)
             {
                 next = RecurrenceUnit switch
                 {
@@ -95,22 +85,9 @@ namespace PWAApi.ApiService.Models.Reminder
 
                 // Increment the counter for each generated occurrence
                 OccurrenceCounter++;
-
-                // Stop if we've hit the count limit
-                if (RecurrenceCount.HasValue && OccurrenceCounter >= RecurrenceCount.Value)
-                {
-                    // Mark complete on last genereted occurrence
-                    IsCompleted = true;
-                    return null;
-                }
             }
 
             return next;
         }
-
-        /// <summary>
-        /// Collection of associated Tasks to complete
-        /// </summary>
-        public virtual ICollection<ReminderTask> Tasks { get; set; } = new HashSet<ReminderTask>();
     }
 }

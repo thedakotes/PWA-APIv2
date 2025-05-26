@@ -1,13 +1,10 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using PWAApi.ApiService.Authentication.Models;
-using API.Models;
-using AutoMapper;
-using PWAApi.ApiService.Middleware;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using PWAApi.ApiService.Authentication.Models;
+using PWAApi.ApiService.Middleware;
 
 namespace PWAApi.ApiService.Authentication.Services
 {

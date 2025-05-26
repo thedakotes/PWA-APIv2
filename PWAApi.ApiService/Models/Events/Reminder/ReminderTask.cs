@@ -1,14 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PWAApi.ApiService.Models.Reminder
+namespace PWAApi.ApiService.Models.Events.Reminder
 {
-    public class ReminderTask : ReminderEntity
+    public class ReminderTask : EventTaskBase
     {
-        /// <summary>
-        /// A link to a site to purchase something, find some information, etc.
-        /// </summary>
-        public string? Url { get; set; }
-
         /// <summary>
         /// Reference to the parent Reminder
         /// </summary>

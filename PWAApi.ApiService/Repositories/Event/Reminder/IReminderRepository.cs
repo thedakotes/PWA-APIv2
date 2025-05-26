@@ -1,6 +1,6 @@
-﻿using PWAApi.ApiService.Models.Reminder;
+﻿using PWAApi.ApiService.Models.Events.Reminder;
 
-namespace PWAApi.ApiService.Repositories
+namespace PWAApi.ApiService.Repositories.Event
 {
     public interface IReminderRepository : IRepository<Reminder>
     {

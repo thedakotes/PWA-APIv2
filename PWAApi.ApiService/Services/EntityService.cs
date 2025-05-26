@@ -1,6 +1,4 @@
-﻿using API.DataTransferObjects;
-using API.Models;
-using AutoMapper;
+﻿using AutoMapper;
 
 namespace PWAApi.ApiService.Services
 {

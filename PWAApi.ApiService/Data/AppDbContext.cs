@@ -1,8 +1,8 @@
-using API.Models;
 using Microsoft.EntityFrameworkCore;
 using PWAApi.ApiService.Authentication.Models;
 using PWAApi.ApiService.Models;
-using PWAApi.ApiService.Models.Reminder;
+using PWAApi.ApiService.Models.Events;
+using PWAApi.ApiService.Models.Events.Reminder;
 using PWAApi.ApiService.Models.Taxonomy;
 
 namespace EventApi.Data
@@ -17,8 +17,9 @@ namespace EventApi.Data
 
         #region DbSet
 
-        public DbSet<Event> Events { get; set; } = null!;
+        public DbSet<CalendarEvent> CalendarEvents { get; set; } = null!;
         public DbSet<Reminder> Reminders { get; set; } = null!;
+        public DbSet<ReminderItem> ReminderItems { get; set; } = null!;
         public DbSet<ReminderTask> ReminderTasks { get; set; } = null!;
         public DbSet<Taxonomy> Taxonomy { get; set; } = null!;
         public DbSet<VernacularName> VernacularNames { get; set; } = null!;
@@ -32,16 +33,35 @@ namespace EventApi.Data
 
         public override int SaveChanges()
         {
-            UpdateTimestamps();
-            UpdateUserIDs();
+            UpdateEntities();
             return base.SaveChanges();
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
+            UpdateEntities();
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+
+        #region Updates
+
+        private void UpdateEntities()
+        {
+            UpdateCompletedOn();
             UpdateTimestamps();
             UpdateUserIDs();
-            return await base.SaveChangesAsync(cancellationToken);
+        }
+
+        private void UpdateCompletedOn()
+        {
+            var entries = ChangeTracker.Entries<ICompletable>();
+            foreach (var entry in entries)
+            {
+                if (entry.State == EntityState.Added || entry.State == EntityState.Modified)
+                {
+                    entry.Entity.CompletedOn = DateTime.UtcNow;
+                }
+            }
         }
 
         private void UpdateTimestamps()
@@ -51,12 +71,12 @@ namespace EventApi.Data
             {
                 if (entry.State == EntityState.Added)
                 {
-                    entry.Entity.CreatedAt = DateTime.UtcNow; // Set CreatedAt for new entities
-                    entry.Entity.UpdatedAt = entry.Entity.CreatedAt; //Since we don't allow nulls for UpdatedAt, we'll make it equal to the CreatedAt date
+                    entry.Entity.CreatedOn = DateTime.UtcNow; // Set CreatedAt for new entities
+                    entry.Entity.UpdatedOn = entry.Entity.CreatedOn; //Since we don't allow nulls for UpdatedAt, we'll make it equal to the CreatedAt date
                 }
                 else if (entry.State == EntityState.Modified)
                 {
-                    entry.Entity.UpdatedAt = DateTime.UtcNow; // Update UpdatedAt for modified entities
+                    entry.Entity.UpdatedOn = DateTime.UtcNow; // Update UpdatedAt for modified entities
                 }
             }
         }
@@ -66,8 +86,10 @@ namespace EventApi.Data
             var entries = ChangeTracker.Entries<IUserAssociated>();
             foreach (var entry in entries)
             {
-                entry.Entity.UserID = _currentUser.UserID;
+                entry.Entity.UserId = _currentUser.UserID;
             }
         }
+
+        #endregion
     }
 }

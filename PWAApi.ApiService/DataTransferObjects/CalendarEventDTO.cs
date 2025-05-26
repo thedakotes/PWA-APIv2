@@ -1,8 +1,7 @@
-using System.Text.Json.Serialization;
 using PWAApi.ApiService.Attributes;
 
 namespace API.DataTransferObjects; // This namespace is used to organize the EventDTO class, indicating that it belongs to the Data Transfer Objects layer of the application
-public class EventDTO
+public class CalendarEventDTO
 {
     [SkipAISchema]
     public int Id {get;set;}    

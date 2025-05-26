@@ -7,11 +7,11 @@ namespace EventApi.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class EventsController : ControllerBase
+public class CalendarEventController : ControllerBase
 {
-    private readonly IEventService _eventsService;
+    private readonly ICalendarEventService _eventsService;
 
-    public EventsController(IEventService eventsService)
+    public CalendarEventController(ICalendarEventService eventsService)
     {
         _eventsService = eventsService;
     }
@@ -49,7 +49,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Add([FromBody] EventDTO newEvent)
+    public async Task<IActionResult> Add([FromBody] CalendarEventDTO newEvent)
     {
         if (newEvent == null)
         {
@@ -59,7 +59,7 @@ public class EventsController : ControllerBase
         try
         {
             // Add the new event using the service
-            EventDTO entity = await _eventsService.Add(newEvent);
+            CalendarEventDTO entity = await _eventsService.Add(newEvent);
             return Ok(entity); // Return a 201 Created response
         }
         catch (Exception ex)
@@ -75,7 +75,7 @@ public class EventsController : ControllerBase
         try
         {
             //This could potentially be a number of different events that get sent in? I haven't tried this yet tho.
-            List<EventDTO> events = await _eventsService.AICreateEvents(message);
+            List<CalendarEventDTO> events = await _eventsService.AICreateEvents(message);
             return Ok(events); // Return a 200
         }
         catch (Exception ex)
