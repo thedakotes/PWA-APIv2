@@ -67,10 +67,17 @@ namespace PWAApi.ApiService.Services
         /// <param name="dataTransferObject">The DTO representing the updated entity.</param>
         public async Task<DTO> Update(DTO dataTransferObject)
         {
-            var entity = _mapper.Map<T>(dataTransferObject);
-            await _repository.UpdateAsync(entity);
-            var modelDTO = _mapper.Map<DTO>(entity);
-            return modelDTO;
+            try
+            {
+                var entity = _mapper.Map<T>(dataTransferObject);
+                await _repository.UpdateAsync(entity);
+                var modelDTO = _mapper.Map<DTO>(entity);
+                return modelDTO;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
         }
 
         /// <summary>

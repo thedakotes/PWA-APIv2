@@ -18,12 +18,17 @@ public class MappingProfile: Profile
 
         CreateMap<Reminder, ReminderDTO>()
             .ForMember(dest => dest.NextOccurrence, opt => opt.MapFrom(src => src.GetNextOccurrence(DateTime.Now)));
+        CreateMap<ReminderDTO, Reminder>();
         CreateMap<CreateReminderDTO, Reminder>();
 
-        CreateMap<ReminderItemDTO, ReminderItem>();
         CreateMap<ReminderItem, ReminderItemDTO>();
+        CreateMap<ReminderItemDTO, ReminderItem>()
+            .ForMember(dest => dest.Reminder, opt => opt.Ignore());
+        CreateMap<CreateReminderItemDTO, ReminderItemDTO>();
 
         CreateMap<ReminderTask, ReminderTaskDTO>();
+        CreateMap<ReminderTaskDTO, ReminderTask>()
+            .ForMember(dest => dest.Reminder, opt => opt.Ignore());
         CreateMap<CreateReminderTaskDTO, ReminderTask>();
         //#endregion
 

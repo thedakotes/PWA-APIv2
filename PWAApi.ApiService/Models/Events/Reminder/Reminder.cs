@@ -4,10 +4,19 @@ namespace PWAApi.ApiService.Models.Events.Reminder
 {
     public class Reminder : RecurringEventBase, ICompletable, IUserAssociated
     {
+        /// <summary>
+        /// Date and time the Reminder was completed
+        /// </summary>
         public DateTimeOffset? CompletedOn { get; set; }
 
+        /// <summary>
+        /// Indicates whether the Reminder has been completed
+        /// </summary>
         public bool IsCompleted { get; set; }
 
+        /// <summary>
+        /// User determined level of priority for the Reminder
+        /// </summary>
         public PriorityLevel PriorityLevel { get; set; } = PriorityLevel.Low;
 
         /// <summary>
@@ -32,6 +41,7 @@ namespace PWAApi.ApiService.Models.Events.Reminder
             {
                 Description = description,
                 Url = url,
+                ReminderId = this.Id,
                 Reminder = this
             };
 
@@ -53,6 +63,7 @@ namespace PWAApi.ApiService.Models.Events.Reminder
                 Description = description,
                 IsCompleted = isCompleted,
                 Url = Url,
+                ReminderId = this.Id,
                 Reminder = this
             };
 

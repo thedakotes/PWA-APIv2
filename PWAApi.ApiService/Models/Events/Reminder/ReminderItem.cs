@@ -1,13 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace PWAApi.ApiService.Models.Events.Reminder
+﻿namespace PWAApi.ApiService.Models.Events.Reminder
 {
     public class ReminderItem : EventItemBase
     {
         /// <summary>
+        /// Foreign key to the parent Reminder
+        /// </summary>
+        public required int ReminderId { get; set; }
+
+        /// <summary>
         /// Reference to the parent Reminder
         /// </summary>
-        [ForeignKey("ReminderID")]
-        public required virtual Reminder Reminder { get; set; }
+        public virtual Reminder? Reminder { get; set; }
     }
 }

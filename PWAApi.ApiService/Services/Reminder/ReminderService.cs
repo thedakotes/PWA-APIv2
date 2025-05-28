@@ -34,7 +34,6 @@ namespace PWAApi.ApiService.Services
             return _mapper.Map<ReminderItemDTO>(item);
         }
 
-
         public async Task<ReminderTaskDTO> AddTask(int id, string description, bool isCompleted, string? url)
         {
             // Check if we have associated Reminder
